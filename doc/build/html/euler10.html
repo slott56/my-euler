@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Summation of primes &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Largest product in a grid" href="euler11.html" />
+    <link rel="prev" title="Special Pythagorean triplet" href="euler09.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="summation-of-primes">
+<h1>Summation of primes<a class="headerlink" href="#summation-of-primes" title="Permalink to this headline">¶</a></h1>
+<p>Problem 10</p>
+<p>The sum of the primes below 10 is 2 + 3 + 5 + 7 = 17.</p>
+<p>Find the sum of all the primes below two million.</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler10"></span><div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">euler07</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="euler10.makePrimes">
+<code class="descclassname">euler10.</code><code class="descname">makePrimes</code><span class="sig-paren">(</span><em>lessThan</em><span class="sig-paren">)</span><a class="headerlink" href="#euler10.makePrimes" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">Generate a list of primes less than 2,000,000</code></dt>
+<dt>
+<code class="descname">using :py:func:`euler07.primeGen`.</code></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lessThan</strong> &#8211; Upper limit, inclusive.
+Should be called lessThanOrEqualTo</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of primes</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">makePrimes</span><span class="p">(</span> <span class="n">lessThan</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Make primes up to a limit.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler10 import makePrimes</span>
+<span class="sd">    &gt;&gt;&gt; sum(makePrimes(10))</span>
+<span class="sd">    17</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">primes</span><span class="p">(</span><span class="n">limit</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">euler07</span><span class="o">.</span><span class="n">primeGen</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="o">&gt;=</span> <span class="n">limit</span><span class="p">:</span> <span class="k">break</span>
+            <span class="k">yield</span> <span class="n">p</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span> <span class="n">primes</span><span class="p">(</span><span class="n">lessThan</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Test module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span> <span class="n">euler07</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute an answer for primes &lt; 2,000,000</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+   <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">makePrimes</span><span class="p">(</span><span class="mi">2000000</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">142913828922</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The sum of all the primes below two million:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler09.html" title="previous chapter">Special Pythagorean triplet</a></li>
+      <li>Next: <a href="euler11.html" title="next chapter">Largest product in a grid</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler10.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler10.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

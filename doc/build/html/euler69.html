@@ -1,0 +1,297 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Totient maximum &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Ordered fractions" href="euler71.html" />
+    <link rel="prev" title="Maximum path sum II" href="euler67.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="totient-maximum">
+<h1>Totient maximum<a class="headerlink" href="#totient-maximum" title="Permalink to this headline">¶</a></h1>
+<p>Problem 69</p>
+<p>Euler&#8217;s Totient function, <img class="math" src="_images/math/ba6e9a26286324828e4f49c0aa16f5157cf3d83e.png" alt="\phi(n)"/> [sometimes called the phi function], is used to
+determine the number of numbers less than n which are relatively prime to n. For
+example, as 1, 2, 4, 5, 7, and 8, are all less than nine and relatively prime to
+nine, φ(9)=6.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>n</td>
+<td>Relatively Prime</td>
+<td>φ(n)</td>
+<td>n/φ(n)</td>
+</tr>
+<tr class="row-even"><td>2</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr class="row-odd"><td>3</td>
+<td>1,2</td>
+<td>2</td>
+<td>1.5</td>
+</tr>
+<tr class="row-even"><td>4</td>
+<td>1,3</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr class="row-odd"><td>5</td>
+<td>1,2,3,4</td>
+<td>4</td>
+<td>1.25</td>
+</tr>
+<tr class="row-even"><td>6</td>
+<td>1,5</td>
+<td>2</td>
+<td>3</td>
+</tr>
+<tr class="row-odd"><td>7</td>
+<td>1,2,3,4,5,6</td>
+<td>6</td>
+<td>1.1666...</td>
+</tr>
+<tr class="row-even"><td>8</td>
+<td>1,3,5,7</td>
+<td>4</td>
+<td>2</td>
+</tr>
+<tr class="row-odd"><td>9</td>
+<td>1,2,4,5,7,8</td>
+<td>6</td>
+<td>1.5</td>
+</tr>
+<tr class="row-even"><td>10</td>
+<td>1,3,7,9</td>
+<td>4</td>
+<td>2.5</td>
+</tr>
+</tbody>
+</table>
+<p>It can be seen that n=6 produces a maximum n/φ(n) for n &lt;= 10.</p>
+<p>Find the value of n &lt;= 1,000,000 for which n/φ(n) is a maximum.</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler69"></span><p>Use the <a class="reference internal" href="euler07.html#euler07.primeGen" title="euler07.primeGen"><code class="xref py py-func docutils literal"><span class="pre">euler07.primeGen()</span></code></a> function.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pprint</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">euler07</span> <span class="kn">import</span> <span class="n">primeGen</span>
+</pre></div>
+</div>
+<p>Construct totient table?
+An inverse Sieve of Eratosthones.
+We discard common prime factors</p>
+<p>Closer to <img class="math" src="_images/math/df51f310fe8c571ac83d0d237f62dcc5a0aa17f5.png" alt="\textbf{O}(n^3)"/> performance. Not good.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">phi_table</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">tt</span><span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">limit</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+    <span class="c"># Decrement totient count for each prime value</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">limit</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="c"># prime</span>
+            <span class="c">#print( &quot;Prime&quot;, i )</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">limit</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">):</span>
+                <span class="c">#print( &quot;remove&quot;, v, &quot;from&quot;, i+v, i+i+v, &quot;...&quot; )</span>
+                <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="n">v</span><span class="p">,</span> <span class="n">limit</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+                    <span class="n">tt</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c"># composite</span>
+            <span class="c">#print( &quot;Factors&quot;, i, set(range(1,i))-tt[i] )</span>
+            <span class="k">pass</span>
+
+    <span class="c">#pprint.pprint( tt )</span>
+    <span class="k">return</span><span class="p">(</span> <span class="nb">dict</span><span class="p">(</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tt</span> <span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Iterate through totient values. Yields a sequence of
+i, φ(i) values</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">phi_iter</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct totient summary.</span>
+<span class="sd">    Decrement totient count for each distinct prime value.</span>
+
+<span class="sd">    &gt;&gt;&gt; phi= list( phi_iter(10) )</span>
+<span class="sd">    &gt;&gt;&gt; phi</span>
+<span class="sd">    [(2, 1), (3, 2), (4, 2), (5, 4), (6, 2), (7, 6), (8, 4), (9, 6), (10, 4)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">remove</span><span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">limit</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remove</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># prime</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">limit</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="n">v</span><span class="p">,</span> <span class="n">limit</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+                    <span class="c"># for all n | i+v &lt;= n=(k*i) &lt;= limit</span>
+                    <span class="c"># for all v | i &lt;= v=(k*i) &lt;= limit-i</span>
+                    <span class="n">remove</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">remove</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">del</span> <span class="n">remove</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test2</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Compare phi_table() and phi_iter().&quot;&quot;&quot;</span>
+    <span class="n">phi</span><span class="o">=</span> <span class="n">phi_table</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+    <span class="n">phi2</span><span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">phi_iter</span><span class="p">(</span><span class="mi">60</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="n">phi</span> <span class="o">==</span> <span class="n">phi2</span><span class="p">,</span> <span class="s">&quot;{0} != {1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="n">phi2</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">check2</span><span class="p">():</span>
+    <span class="n">limit</span><span class="o">=</span> <span class="mi">2311</span>
+    <span class="n">phi</span><span class="o">=</span> <span class="n">phi_table</span><span class="p">(</span><span class="mi">2311</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">210</span><span class="p">,</span> <span class="mi">2310</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span> <span class="n">n</span><span class="p">,</span> <span class="n">phi</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">n</span><span class="o">/</span><span class="n">phi</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; check2()</span>
+<span class="sd">    2 1 2.0</span>
+<span class="sd">    6 2 3.0</span>
+<span class="sd">    30 8 3.75</span>
+<span class="sd">    210 48 4.375</span>
+<span class="sd">    2310 480 4.8125</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute an answer.</p>
+<p>Examine the totient table.
+Up to 30030 takes 80 sec.
+However, this version is useful for checking results.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer1</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">30030</span><span class="p">):</span>
+    <span class="n">maxI</span><span class="o">=</span> <span class="bp">None</span>
+    <span class="n">maxRatio</span><span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">totient</span> <span class="ow">in</span> <span class="n">phi_iter</span><span class="p">(</span><span class="n">limit</span><span class="p">):</span>
+        <span class="c">#print( n, totient, n/totient )</span>
+        <span class="c"># compare maxRatio with i/totient</span>
+        <span class="k">if</span> <span class="n">n</span><span class="o">*</span><span class="n">maxRatio</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">maxRatio</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">totient</span><span class="p">:</span>
+            <span class="n">maxRatio</span> <span class="o">=</span> <span class="p">(</span> <span class="n">n</span><span class="p">,</span> <span class="n">totient</span> <span class="p">)</span>
+            <span class="n">maxI</span><span class="o">=</span> <span class="n">n</span>
+            <span class="k">print</span><span class="p">(</span> <span class="n">n</span><span class="p">,</span> <span class="n">totient</span><span class="p">,</span> <span class="n">n</span><span class="o">/</span><span class="n">totient</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">maxI</span>
+</pre></div>
+</div>
+<p>Much better.</p>
+<p>Max φ(n) achieved when we have the MOST distinct prime factors.
+So, the product of primes 2*3*5*7*11*13*17 should do it.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">max_phi_gen</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; list( max_phi_gen() )</span>
+<span class="sd">    [(2, [2]), (6, [2, 3]), (30, [2, 3, 5]), (210, [2, 3, 5, 7]), (2310, [2, 3, 5, 7, 11]), (30030, [2, 3, 5, 7, 11, 13]), (510510, [2, 3, 5, 7, 11, 13, 17])]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">limit</span><span class="o">=</span> <span class="mi">1000000</span>
+    <span class="n">primes</span><span class="o">=</span> <span class="p">[]</span>
+    <span class="n">prod</span><span class="o">=</span> <span class="mi">1</span>
+    <span class="n">prods</span><span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">primeGen</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">prod</span><span class="o">*</span><span class="n">p</span> <span class="o">&gt;</span> <span class="n">limit</span><span class="p">:</span> <span class="k">break</span>
+        <span class="n">prod</span> <span class="o">*=</span> <span class="n">p</span>
+        <span class="n">primes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">p</span> <span class="p">)</span>
+        <span class="n">prods</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">prod</span> <span class="p">)</span>
+        <span class="k">yield</span> <span class="n">prod</span><span class="p">,</span> <span class="n">primes</span><span class="p">[:]</span>
+
+<span class="k">def</span> <span class="nf">answer2</span><span class="p">():</span>
+    <span class="n">phi_table</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span> <span class="n">max_phi_gen</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">phi_table</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">510510</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer2</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The value of n &lt;= 1,000,000 for which n/phi(n) is a maximum:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler67.html" title="previous chapter">Maximum path sum II</a></li>
+      <li>Next: <a href="euler71.html" title="next chapter">Ordered fractions</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler69.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler69.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

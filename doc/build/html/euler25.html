@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>1000-digit Fibonacci number &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Reciprocal cycles" href="euler26.html" />
+    <link rel="prev" title="Lexicographic permutations" href="euler24.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="digit-fibonacci-number">
+<h1>1000-digit Fibonacci number<a class="headerlink" href="#digit-fibonacci-number" title="Permalink to this headline">¶</a></h1>
+<p>Problem 25</p>
+<p>The Fibonacci sequence is defined by the recurrence relation:</p>
+<div class="math">
+<p><img src="_images/math/7f3a2f4acf90c59536226aa6006602da4268e942.png" alt="F_n = F_{n-1} + F_{n-2}, \textbf{ where } F_{1} = 1 \textbf{ and } F_{2} = 1."/></p>
+</div><p>Hence the first 12 terms will be:</p>
+<blockquote>
+<div><p>F_(1) = 1</p>
+<p>F_(2) = 1</p>
+<p>F_(3) = 2</p>
+<p>F_(4) = 3</p>
+<p>F_(5) = 5</p>
+<p>F_(6) = 8</p>
+<p>F_(7) = 13</p>
+<p>F_(8) = 21</p>
+<p>F_(9) = 34</p>
+<p>F_(10) = 55</p>
+<p>F_(11) = 89</p>
+<p>F_(12) = 144</p>
+</div></blockquote>
+<p>The 12th term, <img class="math" src="_images/math/ed4e360137edbdb68f4348d81e8c32ecedf239dd.png" alt="F_{12}"/>, is the first term to contain three digits.</p>
+<p>What is the first term in the Fibonacci sequence to contain 1000 digits?</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler25"></span><p>First, generate Fibonacci numbers.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">fib_gen</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Generator for Fibonacci numbers.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler25 import fib_gen</span>
+<span class="sd">    &gt;&gt;&gt; fg= fib_gen()</span>
+<span class="sd">    &gt;&gt;&gt; [ next(fg) for i in range(12) ]</span>
+<span class="sd">    [(1, 1), (2, 1), (3, 2), (4, 3), (5, 5), (6, 8), (7, 13), (8, 21), (9, 34), (10, 55), (11, 89), (12, 144)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fn1</span><span class="o">=</span> <span class="mi">0</span>
+    <span class="n">fn0</span><span class="o">=</span> <span class="mi">1</span>
+    <span class="n">t</span><span class="o">=</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">t</span><span class="p">,</span> <span class="n">fn0</span>
+        <span class="n">fn1</span><span class="p">,</span> <span class="n">fn0</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">fn0</span><span class="p">,</span> <span class="n">fn0</span><span class="o">+</span><span class="n">fn1</span><span class="p">,</span> <span class="n">t</span><span class="o">+</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>Second, take Fibonacci numbers until the size limit is reached.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">fibTermLen</span><span class="p">(</span> <span class="n">size</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sequence of Fibonacci numbers until value with the number of digits reached.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler25 import fibTermLen</span>
+<span class="sd">    &gt;&gt;&gt; fibTermLen(3) # 3-digit number</span>
+<span class="sd">    (12, 144)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">limit</span><span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">fib_gen</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">fn</span> <span class="o">&gt;=</span> <span class="n">limit</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">fn</span>
+</pre></div>
+</div>
+<p>Test the components in this module.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">fibTermLen</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">144</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">t</span><span class="p">,</span> <span class="n">fn</span> <span class="o">=</span> <span class="n">fibTermLen</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">t</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="mi">4782</span> <span class="o">==</span> <span class="n">ans</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The first term in the Fibonacci sequence to contain 1000 digits:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler24.html" title="previous chapter">Lexicographic permutations</a></li>
+      <li>Next: <a href="euler26.html" title="next chapter">Reciprocal cycles</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler25.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler25.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

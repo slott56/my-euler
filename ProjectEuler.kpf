@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Komodo Project File - DO NOT EDIT -->
+<project id="6568eb31-a61e-9844-81d9-1f0cf40c22e2" kpf_version="4" name="ProjectEuler.kpf">
+<command cwd="%p" doNotOpenOutputWindow="0" env="" id="5d31b1ea-fec3-3240-951f-328d7a26cfe9" idref="6568eb31-a61e-9844-81d9-1f0cf40c22e2" insertOutput="0" keyboard_shortcut="" name="%(python)" operateOnSelection="0" parseOutput="0" parseRegex="" runIn="new-console" showParsedOutputList="0">
+%(python)</command>
+<command cwd="%p" doNotOpenOutputWindow="0" env="" id="9a674503-2ec1-a249-a911-7b4a7ee6fa35" idref="6568eb31-a61e-9844-81d9-1f0cf40c22e2" insertOutput="0" keyboard_shortcut="F5" name="%(python) %f" operateOnSelection="0" parseOutput="0" parseRegex="" runIn="command-output-window" showParsedOutputList="0">
+%(python) %f</command>
+<preference-set idref="6568eb31-a61e-9844-81d9-1f0cf40c22e2">
+  <boolean id="import_live">1</boolean>
+</preference-set>
+</project>

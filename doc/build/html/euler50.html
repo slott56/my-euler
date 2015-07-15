@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Consecutive prime sum &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Prime digit replacements" href="euler51.html" />
+    <link rel="prev" title="Prime permutations" href="euler49.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="consecutive-prime-sum">
+<h1>Consecutive prime sum<a class="headerlink" href="#consecutive-prime-sum" title="Permalink to this headline">¶</a></h1>
+<p>Problem 50</p>
+<p>The prime 41, can be written as the sum of six consecutive primes:</p>
+<blockquote>
+<div>41 = 2 + 3 + 5 + 7 + 11 + 13</div></blockquote>
+<p>This is the longest sum of consecutive primes that adds to a prime below one-hundred.</p>
+<p>The longest sum of consecutive primes below one-thousand that adds to a prime,
+contains 21 terms, and is equal to 953.</p>
+<p>Which prime, below one-million, can be written as the sum of the most
+consecutive primes?</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler50"></span><p>Two handy functions: <a class="reference internal" href="euler10.html#euler10.makePrimes" title="euler10.makePrimes"><code class="xref py py-func docutils literal"><span class="pre">euler10.makePrimes()</span></code></a> and
+<a class="reference internal" href="euler03.html#euler03.isprime" title="euler03.isprime"><code class="xref py py-func docutils literal"><span class="pre">euler03.isprime()</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">euler10</span> <span class="kn">import</span> <span class="n">makePrimes</span>
+<span class="kn">from</span> <span class="nn">euler03</span> <span class="kn">import</span> <span class="n">isprime</span>
+</pre></div>
+</div>
+<p>A poor algorithm. Here for reference.
+This appears to be <img class="math" src="_images/math/df51f310fe8c571ac83d0d237f62dcc5a0aa17f5.png" alt="\textbf{O}(n^3)"/> on <code class="samp docutils literal"><span class="pre">len(primes)</span></code>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">primesAsSumBad</span><span class="p">(</span> <span class="n">upTo</span><span class="o">=</span><span class="mi">1000000</span> <span class="p">):</span>
+    <span class="n">primes</span><span class="o">=</span> <span class="n">makePrimes</span><span class="p">(</span><span class="n">upTo</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">primes</span><span class="p">:</span>
+        <span class="c"># Find a consecutive sequence of primes that sum to t.</span>
+        <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="nb">sum</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">primes</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">primes</span><span class="p">)):</span>
+                <span class="nb">sum</span> <span class="o">+=</span> <span class="n">primes</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">sum</span> <span class="o">==</span> <span class="n">t</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">primes</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">t</span>
+                <span class="k">if</span> <span class="nb">sum</span> <span class="o">&gt;</span> <span class="n">t</span><span class="p">:</span> <span class="k">break</span>
+</pre></div>
+</div>
+<p>A better algorithm.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">primesAsSum</span><span class="p">(</span><span class="n">upTo</span><span class="o">=</span><span class="mi">1000000</span><span class="p">):</span>
+    <span class="n">primes</span><span class="o">=</span> <span class="n">makePrimes</span><span class="p">(</span><span class="n">upTo</span><span class="p">)</span>
+    <span class="n">pSet</span><span class="o">=</span> <span class="nb">set</span><span class="p">(</span> <span class="n">primes</span> <span class="p">)</span>
+    <span class="n">topPrime</span><span class="o">=</span> <span class="n">primes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="nb">sum</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span> <span class="n">primes</span> <span class="p">):</span>
+        <span class="n">i</span><span class="o">=</span> <span class="n">start</span>
+        <span class="k">while</span> <span class="nb">sum</span> <span class="o">&lt;=</span> <span class="n">topPrime</span> <span class="ow">and</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">primes</span><span class="p">):</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nb">sum</span> <span class="o">+=</span> <span class="n">primes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">sum</span> <span class="ow">in</span> <span class="n">pSet</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">primes</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="nb">sum</span>
+</pre></div>
+</div>
+<p>Given primes as sums, what&#8217;s the longest sequence of primes
+with a prime sum?</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">longestPrimeAsSum</span><span class="p">(</span> <span class="n">upTo</span><span class="o">=</span><span class="mi">1000000</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; from euler50 import makePrimes, isprime, longestPrimeAsSum</span>
+<span class="sd">    &gt;&gt;&gt; primes= makePrimes(100)</span>
+<span class="sd">    &gt;&gt;&gt; all( isprime(p) for p in primes )</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; longestPrimeAsSum( 100 )</span>
+<span class="sd">    (6, [2, 3, 5, 7, 11, 13], 41)</span>
+<span class="sd">    &gt;&gt;&gt; longestPrimeAsSum( 1000 )</span>
+<span class="sd">    (21, [7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89], 953)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">max_list</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span> <span class="n">primesAsSum</span><span class="p">(</span><span class="n">upTo</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">list_sum</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_sum</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">)</span>
+    <span class="n">l</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">max_list</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">),</span> <span class="n">l</span><span class="p">,</span> <span class="n">s</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">prime</span> <span class="o">=</span> <span class="n">longestPrimeAsSum</span><span class="p">(</span><span class="mi">1000000</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">prime</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">997651</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler49.html" title="previous chapter">Prime permutations</a></li>
+      <li>Next: <a href="euler51.html" title="next chapter">Prime digit replacements</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler50.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler50.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

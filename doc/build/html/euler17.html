@@ -1,0 +1,263 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Number letter counts &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Maximum path sum I" href="euler18.html" />
+    <link rel="prev" title="Power digit sum" href="euler16.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="number-letter-counts">
+<h1>Number letter counts<a class="headerlink" href="#number-letter-counts" title="Permalink to this headline">¶</a></h1>
+<p>Problem 17</p>
+<p>If the numbers 1 to 5 are written out in words: one, two, three, four, five,
+then there are 3 + 3 + 5 + 4 + 4 = 19 letters used in total.</p>
+<p>If all the numbers from 1 to 1000 (one thousand) inclusive were written out in
+words, how many letters would be used?</p>
+<p>NOTE: Do not count spaces or hyphens. For example, 342 (three hundred and
+forty-two) contains 23 letters and 115 (one hundred and fifteen) contains 20
+letters. The use of &#8220;and&#8221; when writing out numbers is in compliance with British
+usage.</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler17"></span><p>Our lexicon</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">numbers</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="s">&quot;one&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s">&quot;two&quot;</span><span class="p">,</span> <span class="mi">3</span> <span class="p">:</span> <span class="s">&quot;three&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span><span class="s">&quot;four&quot;</span><span class="p">,</span>  <span class="mi">5</span><span class="p">:</span> <span class="s">&quot;five&quot;</span><span class="p">,</span>
+    <span class="mi">6</span><span class="p">:</span><span class="s">&quot;six&quot;</span><span class="p">,</span> <span class="mi">7</span><span class="p">:</span><span class="s">&quot;seven&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">:</span><span class="s">&quot;eight&quot;</span><span class="p">,</span> <span class="mi">9</span><span class="p">:</span><span class="s">&quot;nine&quot;</span> <span class="p">}</span>
+<span class="n">tens</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">2</span><span class="p">:</span><span class="s">&quot;twenty&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="s">&quot;thirty&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span><span class="s">&quot;forty&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span><span class="s">&quot;fifty&quot;</span><span class="p">,</span>
+    <span class="mi">6</span><span class="p">:</span><span class="s">&quot;sixty&quot;</span><span class="p">,</span> <span class="mi">7</span><span class="p">:</span><span class="s">&quot;seventy&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">:</span><span class="s">&quot;eighty&quot;</span><span class="p">,</span> <span class="mi">9</span><span class="p">:</span><span class="s">&quot;ninety&quot;</span> <span class="p">}</span>
+<span class="n">teens</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">10</span><span class="p">:</span><span class="s">&quot;ten&quot;</span><span class="p">,</span> <span class="mi">11</span><span class="p">:</span> <span class="s">&quot;eleven&quot;</span><span class="p">,</span> <span class="mi">12</span><span class="p">:</span><span class="s">&quot;twelve&quot;</span><span class="p">,</span> <span class="mi">13</span><span class="p">:</span><span class="s">&quot;thirteen&quot;</span><span class="p">,</span> <span class="mi">14</span><span class="p">:</span><span class="s">&quot;fourteen&quot;</span><span class="p">,</span> <span class="mi">15</span><span class="p">:</span><span class="s">&quot;fifteen&quot;</span><span class="p">,</span>
+    <span class="mi">16</span><span class="p">:</span> <span class="s">&quot;sixteen&quot;</span><span class="p">,</span> <span class="mi">17</span><span class="p">:</span><span class="s">&quot;seventeen&quot;</span><span class="p">,</span> <span class="mi">18</span><span class="p">:</span><span class="s">&quot;eighteen&quot;</span><span class="p">,</span> <span class="mi">19</span><span class="p">:</span><span class="s">&quot;nineteen&quot;</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>Create English words for numbers.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">english</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;English for a number.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler17 import english</span>
+<span class="sd">    &gt;&gt;&gt; english(1)</span>
+<span class="sd">    &#39;one&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(2)</span>
+<span class="sd">    &#39;two&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(3)</span>
+<span class="sd">    &#39;three&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(4)</span>
+<span class="sd">    &#39;four&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(5)</span>
+<span class="sd">    &#39;five&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(6)</span>
+<span class="sd">    &#39;six&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(7)</span>
+<span class="sd">    &#39;seven&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(8)</span>
+<span class="sd">    &#39;eight&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(9)</span>
+<span class="sd">    &#39;nine&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(10)</span>
+<span class="sd">    &#39;ten&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(11)</span>
+<span class="sd">    &#39;eleven&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(12)</span>
+<span class="sd">    &#39;twelve&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(13)</span>
+<span class="sd">    &#39;thirteen&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(14)</span>
+<span class="sd">    &#39;fourteen&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(15)</span>
+<span class="sd">    &#39;fifteen&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(16)</span>
+<span class="sd">    &#39;sixteen&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(17)</span>
+<span class="sd">    &#39;seventeen&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(18)</span>
+<span class="sd">    &#39;eighteen&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(19)</span>
+<span class="sd">    &#39;nineteen&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(20)</span>
+<span class="sd">    &#39;twenty&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(99)</span>
+<span class="sd">    &#39;ninety-nine&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(100)</span>
+<span class="sd">    &#39;one hundred&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(101)</span>
+<span class="sd">    &#39;one hundred and one&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(990)</span>
+<span class="sd">    &#39;nine hundred and ninety&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(991)</span>
+<span class="sd">    &#39;nine hundred and ninety-one&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(999)</span>
+<span class="sd">    &#39;nine hundred and ninety-nine&#39;</span>
+<span class="sd">    &gt;&gt;&gt; english(1000)</span>
+<span class="sd">    &#39;one thousand&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;=</span> <span class="mi">1000</span><span class="p">:</span>
+        <span class="n">n4</span><span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">1000</span>
+        <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">numbers</span><span class="p">[</span><span class="n">n4</span><span class="p">]</span> <span class="p">)</span>
+        <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="s">&quot;thousand&quot;</span> <span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">1000</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="n">n3</span><span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">100</span>
+        <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">numbers</span><span class="p">[</span><span class="n">n3</span><span class="p">]</span> <span class="p">)</span>
+        <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="s">&quot;hundred&quot;</span> <span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">100</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">words</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="s">&quot;and&quot;</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;=</span> <span class="mi">20</span><span class="p">:</span>
+        <span class="n">n2</span><span class="p">,</span> <span class="n">n3</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span> <span class="n">n</span><span class="p">,</span> <span class="mi">10</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">n3</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">tens</span><span class="p">[</span><span class="n">n2</span><span class="p">]</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">tens</span><span class="p">[</span><span class="n">n2</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;-&quot;</span> <span class="o">+</span> <span class="n">numbers</span><span class="p">[</span><span class="n">n</span><span class="o">%</span><span class="mi">10</span><span class="p">]</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">n</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">teens</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">numbers</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">words</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Count letters in a phrase after removing spaces and hyphens.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">letters</span><span class="p">(</span> <span class="n">text</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Strip spaces and hyphens, and count letters.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler17 import english, letters</span>
+<span class="sd">    &gt;&gt;&gt; e342= english(342)</span>
+<span class="sd">    &gt;&gt;&gt; e342</span>
+<span class="sd">    &#39;three hundred and forty-two&#39;</span>
+<span class="sd">    &gt;&gt;&gt; letters(e342)</span>
+<span class="sd">    23</span>
+<span class="sd">    &gt;&gt;&gt; e115= english(115)</span>
+<span class="sd">    &gt;&gt;&gt; e115</span>
+<span class="sd">    &#39;one hundred and fifteen&#39;</span>
+<span class="sd">    &gt;&gt;&gt; letters(e115)</span>
+<span class="sd">    20</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Demonstrate <code class="xref py py-func docutils literal"><span class="pre">english()</span></code> function.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">demo</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Show first 20 numbers and 990 to 1001 to create bulk unit test cases.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span> <span class="s">&quot;&gt;&gt;&gt; english({0})</span><span class="se">\n</span><span class="s">{1!r}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">i</span><span class="p">,</span> <span class="n">english</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">990</span><span class="p">,</span><span class="mi">1001</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span> <span class="s">&quot;&gt;&gt;&gt; english({0})</span><span class="se">\n</span><span class="s">{1!r}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">i</span><span class="p">,</span> <span class="n">english</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Test module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+   <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">letters</span><span class="p">(</span><span class="n">english</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1001</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">21124</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The number of letters used to write&quot;</span>
+        <span class="s">&quot; all the numbers from 1 to 1000 inclusive:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler16.html" title="previous chapter">Power digit sum</a></li>
+      <li>Next: <a href="euler18.html" title="next chapter">Maximum path sum I</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler17.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler17.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

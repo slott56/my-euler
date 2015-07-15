@@ -1,0 +1,336 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Prime digit replacements &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Permuted multiples" href="euler52.html" />
+    <link rel="prev" title="Consecutive prime sum" href="euler50.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="prime-digit-replacements">
+<h1>Prime digit replacements<a class="headerlink" href="#prime-digit-replacements" title="Permalink to this headline">¶</a></h1>
+<p>Problem 51</p>
+<p>By replacing the 1st digit of the 2-digit number <code class="docutils literal"><span class="pre">*3</span></code>, it turns out that
+six of the nine possible values: 13, 23, 43, 53, 73, and 83, are all
+prime.</p>
+<p>By replacing the 3rd and 4th digits of <code class="docutils literal"><span class="pre">56**3</span></code> with the same digit, this
+5-digit number is the first example having seven primes among the ten
+generated numbers, yielding the family: 56003, 56113, 56333, 56443,
+56663, 56773, and 56993. Consequently 56003, being the first member of
+this family, is the smallest prime with this property.</p>
+<p>Find the smallest prime which, by replacing part of the number (not
+necessarily adjacent digits) with the same digit, is part of an eight
+prime value family.</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler51"></span><p>Some handy functions: <a class="reference internal" href="euler07.html#euler07.makePrimes" title="euler07.makePrimes"><code class="xref py py-func docutils literal"><span class="pre">euler07.makePrimes()</span></code></a> and <a class="reference internal" href="euler07.html#euler07.primeGen" title="euler07.primeGen"><code class="xref py py-func docutils literal"><span class="pre">euler07.primeGen()</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">euler07</span> <span class="kn">import</span> <span class="n">primeGen</span><span class="p">,</span> <span class="n">makePrimes</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+</pre></div>
+</div>
+<p>We enumerate large numbers of patterns of numbers and see how many
+are primes.</p>
+<p>Or.</p>
+<p>We apply a starting-point filter to the above approach.</p>
+<p>We&#8217;re looking at doing substitutions within n-digit primes.
+This inolves <img class="math" src="_images/math/7b3506104b1010207d035a85e64cd39e36f958f8.png" alt="\dbinom{n}{k}"/> replacement positions for <img class="math" src="_images/math/7e491998b0f499b5eb95cb86561f1babe53fc8e6.png" alt="k \leq n"/>.
+For each position, we try all 9 digits in the various positions
+to see how many primes end up with.</p>
+<p>We apply this search with each prime as a starting point and see how
+many results are in the set of primes.</p>
+<p>Or.</p>
+<p>We&#8217;re looking at primes with <em>some</em> matching digits.
+Again, we could enumerate all <img class="math" src="_images/math/7b3506104b1010207d035a85e64cd39e36f958f8.png" alt="\dbinom{n}{k}"/> &#8220;open&#8221;
+positions positions for <img class="math" src="_images/math/7e491998b0f499b5eb95cb86561f1babe53fc8e6.png" alt="k \leq n"/>. All other positions
+will have to match. But, we don&#8217;t really have all combinations
+available.</p>
+<p>We partition the primes into 3-, 4-, 5- and 6- digit batches.
+(Primes, p, leq 1,000,000)
+And search each batch for patterns where a prime has
+2 or more repeating digits.</p>
+<p>Sort of like filtering for poker hands with pairs or better.</p>
+<p>Each prime with 2 or more repeating digits belongs to a template.
+So 56003 has repeating 0; the template
+is 56**3. 56113 has repeating 1; the template is 56**3.</p>
+<p>We&#8217;re transforming prime -&gt; template to see how many primes fit
+each template.</p>
+<p>Note that a given number has multiple templates.
+56333 -&gt; <em>6333, 5*333, 56*33, 563*3, 5633</em>, 56**3, 563**, 56*3*, 56***.
+Essentially all <img class="math" src="_images/math/e3eac54d53c30794ee37c4f02cf34a4901a8f0c4.png" alt="2^n"/> combinations of same digit positions get replaced
+by &#8216;*&#8217;.</p>
+<p>Even more interesting would be a 122334 where there are two repeated sections.
+This leads to even more potential patterns for this number.</p>
+<p>Nearly a duplicate of <a class="reference internal" href="euler04.html#euler04.digits" title="euler04.digits"><code class="xref py py-func docutils literal"><span class="pre">euler04.digits()</span></code></a>. Uses tuple instead
+of a list.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">digits</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Expand a number, n, into a tuple of digits.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler51 import digits</span>
+<span class="sd">    &gt;&gt;&gt; digits(56003)</span>
+<span class="sd">    (5, 6, 0, 0, 3)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="n">n</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">10</span> <span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">10</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Determine the duplicated digits within a number.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">all_dups</span><span class="p">(</span> <span class="n">d</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decompose a number&#39;s digits, d, into a summary of duplicated digits.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler51 import all_dups</span>
+<span class="sd">    &gt;&gt;&gt; all_dups( (5, 6, 0, 0, 3) )</span>
+<span class="sd">    {(0, 2)}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">((</span><span class="n">n</span><span class="p">,</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="p">(</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">n</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">d</span> <span class="p">)</span> <span class="k">if</span> <span class="n">c</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Yet another version of <a class="reference internal" href="euler10.html#euler10.makePrimes" title="euler10.makePrimes"><code class="xref py py-func docutils literal"><span class="pre">euler10.makePrimes()</span></code></a>.
+This version includes a start and stop value.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">primesTo</span><span class="p">(</span> <span class="n">start</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mi">10</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate a sequence of primes to a limit.</span>
+
+<span class="sd">    &gt;&gt;&gt; list(primesTo(stop=10))</span>
+<span class="sd">    [2, 3, 5, 7]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">primeGen</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="n">start</span><span class="p">:</span> <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="o">&gt;=</span> <span class="n">stop</span><span class="p">:</span> <span class="k">break</span>
+        <span class="k">yield</span> <span class="n">p</span>
+</pre></div>
+</div>
+<p>Use <code class="xref py py-func docutils literal"><span class="pre">all_dups()</span></code> and <code class="xref py py-func docutils literal"><span class="pre">primesTo()</span></code> to get a list
+of primes with duplicated digits.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">prime_dup_list</span><span class="p">(</span><span class="n">primes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; from euler51 import prime_dup_list, primesTo</span>
+<span class="sd">    &gt;&gt;&gt; prime_dup_list(primesTo(stop=102))</span>
+<span class="sd">    [(&#39;11&#39;, {(&#39;1&#39;, 2)}), (&#39;101&#39;, {(&#39;1&#39;, 2)})]</span>
+<span class="sd">    &gt;&gt;&gt; p, dup_set = prime_dup_list( [56333] )[0]</span>
+<span class="sd">    &gt;&gt;&gt; p</span>
+<span class="sd">    &#39;56333&#39;</span>
+<span class="sd">    &gt;&gt;&gt; dup_set</span>
+<span class="sd">    {(&#39;3&#39;, 3)}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">p_d</span><span class="p">,</span> <span class="n">dups</span><span class="p">)</span> <span class="k">for</span> <span class="n">p_d</span><span class="p">,</span> <span class="n">dups</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">p_d</span><span class="p">,</span> <span class="n">all_dups</span><span class="p">(</span><span class="n">p_d</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">p_d</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">primes</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">dups</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>An exploration of the problem space.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">candidates</span><span class="o">=</span> <span class="n">prime_dup_list</span><span class="p">(</span> <span class="n">primesTo</span><span class="p">(</span><span class="n">stop</span><span class="o">=</span><span class="mi">100000000</span><span class="p">)</span> <span class="p">)</span>
+<span class="n">distr</span><span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">pat</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+    <span class="n">distr</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">c</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="n">pat</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">length</span> <span class="ow">in</span> <span class="n">distr</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span> <span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">distr</span><span class="p">[</span><span class="n">length</span><span class="p">])</span> <span class="p">)</span>
+<span class="k">del</span> <span class="n">distr</span>
+</pre></div>
+</div>
+<p>Where is a character duplicated?</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">indices</span><span class="p">(</span> <span class="n">string</span><span class="p">,</span> <span class="n">char</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return indices where char occurs in the given string.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler51 import indices</span>
+<span class="sd">    &gt;&gt;&gt; indices( &quot;56333&quot;, &quot;3&quot; )</span>
+<span class="sd">    (2, 3, 4)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="p">))</span> <span class="k">if</span> <span class="n">string</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">char</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Replace a duplicated character with &#8220;*&#8221; to change a number
+to a pattern.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">rewrite</span><span class="p">(</span> <span class="n">string</span><span class="p">,</span> <span class="n">positions</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Rewrite a string to replace given positions with &quot;*&quot;.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler51 import rewrite</span>
+<span class="sd">    &gt;&gt;&gt; rewrite( &quot;56333&quot;, (2, 3, 4) )</span>
+<span class="sd">    &#39;56***&#39;</span>
+<span class="sd">    &gt;&gt;&gt; [rewrite(&#39;56333&#39;,combo) for combo in itertools.combinations((2,3,4),2)]</span>
+<span class="sd">    [&#39;56**3&#39;, &#39;56*3*&#39;, &#39;563**&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="s">&#39;*&#39;</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">positions</span> <span class="k">else</span> <span class="n">string</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="p">))</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>For a set of candidate numbers (primes with duplicated digits)
+replace the duplicated digits with &#8220;*&#8221; to reduce them to patterns.
+Then expand each combination of digit positions to locate alternative
+patterns, creating a pattern space with patterns and numbers that
+fit the pattern.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">pattern_space</span><span class="p">(</span> <span class="n">candidates</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; from euler51 import prime_dup_list, pattern_space</span>
+<span class="sd">    &gt;&gt;&gt; candidates= prime_dup_list([56003, 56993, 56773, 56333, 56113, 56443, 56663])</span>
+<span class="sd">    &gt;&gt;&gt; pat_space= pattern_space(candidates)</span>
+<span class="sd">    &gt;&gt;&gt; sorted(pat_space[&#39;56**3&#39;])</span>
+<span class="sd">    [&#39;56003&#39;, &#39;56113&#39;, &#39;56333&#39;, &#39;56443&#39;, &#39;56663&#39;, &#39;56773&#39;, &#39;56993&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pat_space</span><span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">dup_set</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+        <span class="c"># e.g. p=&#39;56333&#39;, dup_set= set([(&#39;3&#39;, 3)]))</span>
+        <span class="k">for</span> <span class="n">digit</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">dup_set</span><span class="p">:</span>
+            <span class="n">pat_space</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">digit</span><span class="p">,</span> <span class="s">&#39;*&#39;</span><span class="p">)]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+            <span class="c"># Need all 2*n variants of partial replacement.</span>
+            <span class="n">positions</span> <span class="o">=</span> <span class="n">indices</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">digit</span><span class="p">)</span>
+            <span class="c"># e.g., positions=(2, 3)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">combo</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span><span class="n">i</span><span class="p">):</span>
+                    <span class="n">pat_space</span><span class="p">[</span><span class="n">rewrite</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">combo</span><span class="p">)]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pat_space</span>
+</pre></div>
+</div>
+<p>Filter a pattern space for patterns of length 8 or longer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">pattern_space_8</span><span class="p">(</span> <span class="n">pat_space</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Filter to extract patterns of length 8 from a pattern space.</span>
+<span class="sd">    This will visit each key; if the set of patterns is large enough,</span>
+<span class="sd">    then each set is yielded.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler51 import pattern_space_8</span>
+<span class="sd">    &gt;&gt;&gt; from euler51 import prime_dup_list, primesTo, pattern_space</span>
+<span class="sd">    &gt;&gt;&gt; candidates= prime_dup_list(primesTo(start=10000,stop=10000000))</span>
+<span class="sd">    &gt;&gt;&gt; pat_space= pattern_space(candidates)</span>
+<span class="sd">    &gt;&gt;&gt; p8= sorted(list(pattern_space_8(pat_space)), key=lambda a:min(a))</span>
+<span class="sd">    &gt;&gt;&gt; for p in p8:</span>
+<span class="sd">    ...     print(sorted(p))</span>
+<span class="sd">    [&#39;121313&#39;, &#39;222323&#39;, &#39;323333&#39;, &#39;424343&#39;, &#39;525353&#39;, &#39;626363&#39;, &#39;828383&#39;, &#39;929393&#39;]</span>
+<span class="sd">    [&#39;2090021&#39;, &#39;2191121&#39;, &#39;2292221&#39;, &#39;2494421&#39;, &#39;2595521&#39;, &#39;2696621&#39;, &#39;2898821&#39;, &#39;2999921&#39;]</span>
+<span class="sd">    [&#39;4004509&#39;, &#39;4114519&#39;, &#39;4224529&#39;, &#39;4444549&#39;, &#39;4554559&#39;, &#39;4774579&#39;, &#39;4884589&#39;, &#39;4994599&#39;]</span>
+<span class="sd">    [&#39;5074009&#39;, &#39;5174119&#39;, &#39;5374339&#39;, &#39;5474449&#39;, &#39;5574559&#39;, &#39;5774779&#39;, &#39;5874889&#39;, &#39;5974999&#39;]</span>
+<span class="sd">    [&#39;5181019&#39;, &#39;5282029&#39;, &#39;5383039&#39;, &#39;5484049&#39;, &#39;5585059&#39;, &#39;5787079&#39;, &#39;5888089&#39;, &#39;5989099&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">p_set</span> <span class="ow">in</span> <span class="n">pat_space</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p_set</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">p_set</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; import itertools</span>
+<span class="sd">    &gt;&gt;&gt; list(itertools.combinations((2,3,4),1))</span>
+<span class="sd">    [(2,), (3,), (4,)]</span>
+<span class="sd">    &gt;&gt;&gt; list(itertools.combinations((2,3,4),2))</span>
+<span class="sd">    [(2, 3), (2, 4), (3, 4)]</span>
+<span class="sd">    &gt;&gt;&gt; list(itertools.combinations((2,3,4),3))</span>
+<span class="sd">    [(2, 3, 4)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">candidates</span><span class="o">=</span> <span class="n">prime_dup_list</span><span class="p">(</span><span class="n">primesTo</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span><span class="n">stop</span><span class="o">=</span><span class="mi">10000000</span><span class="p">))</span>
+    <span class="n">pat_space</span><span class="o">=</span> <span class="n">pattern_space</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span>
+    <span class="n">pat_8</span> <span class="o">=</span> <span class="n">pattern_space_8</span><span class="p">(</span><span class="n">pat_space</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span> <span class="nb">min</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pat_8</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="s">&#39;121313&#39;</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The smallest prime which, by replacing part of the number (not&quot;</span>
+<span class="s">&quot; necessarily adjacent digits) with the same digit, is part of an eight&quot;</span>
+<span class="s">&quot; prime value family:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler50.html" title="previous chapter">Consecutive prime sum</a></li>
+      <li>Next: <a href="euler52.html" title="next chapter">Permuted multiples</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler51.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler51.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

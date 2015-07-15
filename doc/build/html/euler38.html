@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Pandigital multiples &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Integer right triangles" href="euler39.html" />
+    <link rel="prev" title="Truncatable primes" href="euler37.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pandigital-multiples">
+<h1>Pandigital multiples<a class="headerlink" href="#pandigital-multiples" title="Permalink to this headline">¶</a></h1>
+<p>Problem 38</p>
+<p>Take the number 192 and multiply it by each of 1, 2, and 3:</p>
+<blockquote>
+<div><p>192 × 1 = 192</p>
+<p>192 × 2 = 384</p>
+<p>192 × 3 = 576</p>
+</div></blockquote>
+<p>By concatenating each product we get the 1 to 9 pandigital, 192384576. We will
+call 192384576 the concatenated product of 192 and (1,2,3)</p>
+<p>The same can be achieved by starting with 9 and multiplying by 1, 2, 3, 4, and
+5, giving the pandigital, 918273645, which is the concatenated product of 9 and
+(1,2,3,4,5).</p>
+<p>What is the largest 1 to 9 pandigital 9-digit number that can be formed as the
+concatenated product of an integer with (1,2, ... , n) where n &gt; 1?</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler38"></span><p>We&#8217;ll use <a class="reference internal" href="euler04.html#euler04.digits" title="euler04.digits"><code class="xref py py-func docutils literal"><span class="pre">euler04.digits()</span></code></a> and <a class="reference internal" href="euler35.html#euler35.number" title="euler35.number"><code class="xref py py-func docutils literal"><span class="pre">euler35.number()</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">euler04</span> <span class="kn">import</span> <span class="n">digits</span>
+<span class="kn">from</span> <span class="nn">euler35</span> <span class="kn">import</span> <span class="n">number</span>
+</pre></div>
+</div>
+<p>A test for being pan-digital. Zero&#8217;s are excluded from the test.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">pandigital</span><span class="p">(</span> <span class="n">da</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">9</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;All digits from 1 to order?</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler38 import pandigital</span>
+<span class="sd">    &gt;&gt;&gt; pandigital( digits(192384576) )</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; pandigital( digits(192384476) )</span>
+<span class="sd">    False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">da</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">9</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+    <span class="n">dSeen</span><span class="o">=</span> <span class="p">(</span><span class="n">order</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">[</span><span class="bp">False</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">da</span><span class="p">:</span>
+        <span class="n">dSeen</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">=</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">dSeen</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+</pre></div>
+</div>
+<p>Compute a product concatenation from multiples of <em>n</em>. Stop when we
+have a 9-digit number.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">prodConcat</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a 9-digit concatenaed product by successive multiplications</span>
+<span class="sd">    of n by 1, 2, 3, ..., 9</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler38 import prodConcat</span>
+<span class="sd">    &gt;&gt;&gt; prodConcat( 192 )</span>
+<span class="sd">    [1, 9, 2, 3, 8, 4, 5, 7, 6]</span>
+<span class="sd">    &gt;&gt;&gt; prodConcat( 9 )</span>
+<span class="sd">    [9, 1, 8, 2, 7, 3, 6, 4, 5]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">seq</span><span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">):</span>
+        <span class="n">seq</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">digits</span><span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="n">p</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">9</span><span class="p">:</span> <span class="k">break</span>
+    <span class="k">return</span> <span class="n">seq</span>
+</pre></div>
+</div>
+<p>Generate all pan-digital numbers by starting within a range of 1,000,000.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">genPanDigitalProdConcat</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Get the list of pandigital products.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler38 import genPanDigitalProdConcat</span>
+<span class="sd">    &gt;&gt;&gt; pdpc= list( genPanDigitalProdConcat() )</span>
+<span class="sd">    &gt;&gt;&gt; pdpc.sort()</span>
+<span class="sd">    &gt;&gt;&gt; pdpc # doctest: +ELLIPSIS</span>
+<span class="sd">    [123456789, 192384576, 219438657, ..., 927318546, 932718654]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000000</span><span class="p">):</span>
+        <span class="n">seq</span><span class="o">=</span> <span class="n">prodConcat</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pandigital</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">number</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">pandigital</span><span class="p">(</span> <span class="n">digits</span><span class="p">(</span><span class="mi">192384576</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Create the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span> <span class="n">genPanDigitalProdConcat</span><span class="p">()</span> <span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">932718654</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The largest 1 to 9 pandigital 9-digit number that can be formed as the&quot;</span>
+        <span class="s">&quot; concatenated product of an integer with (1,2, ... , n) where n &gt; 1:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler37.html" title="previous chapter">Truncatable primes</a></li>
+      <li>Next: <a href="euler39.html" title="next chapter">Integer right triangles</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler38.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler38.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

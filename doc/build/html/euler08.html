@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Largest product in a series &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Special Pythagorean triplet" href="euler09.html" />
+    <link rel="prev" title="10001st prime" href="euler07.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="largest-product-in-a-series">
+<h1>Largest product in a series<a class="headerlink" href="#largest-product-in-a-series" title="Permalink to this headline">¶</a></h1>
+<p>Problem 8</p>
+<p>The four adjacent digits in the 1000-digit number that have the greatest product are 9 × 9 × 8 × 9 = 5832.</p>
+<pre class="literal-block">
+73167176531330624919225119674426574742355349194934
+96983520312774506326239578318016984801869478851843
+85861560789112949495459501737958331952853208805511
+12540698747158523863050715693290963295227443043557
+66896648950445244523161731856403098711121722383113
+62229893423380308135336276614282806444486645238749
+30358907296290491560440772390713810515859307960866
+70172427121883998797908792274921901699720888093776
+65727333001053367881220235421809751254540594752243
+52584907711670556013604839586446706324415722155397
+53697817977846174064955149290862569321978468622482
+83972241375657056057490261407972968652414535100474
+821663704844031<span class="red-text">9989</span>0008895243450658541227588666881
+16427171479924442928230863465674813919123162824586
+17866458359124566529476545682848912883142607690042
+24219022671055626321111109370544217506941658960408
+07198403850962455444362981230987879927244284909188
+84580156166097919133875499200524063689912560717606
+05886116467109405077541002256983155200055935729725
+71636269561882670428252483600823257530420752963450
+</pre>
+<p>Older: Find the greatest product of five consecutive digits in the 1000-digit number.</p>
+<p>Newer: Find the thirteen adjacent digits in the 1000-digit number that have the greatest product.
+What is the value of this product?</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler08"></span><div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">euler05</span>
+</pre></div>
+</div>
+<p>Build a 1,000 character string from various lines.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">digits</span><span class="o">=</span> <span class="s">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">73167176531330624919225119674426574742355349194934</span>
+<span class="s">96983520312774506326239578318016984801869478851843</span>
+<span class="s">85861560789112949495459501737958331952853208805511</span>
+<span class="s">12540698747158523863050715693290963295227443043557</span>
+<span class="s">66896648950445244523161731856403098711121722383113</span>
+<span class="s">62229893423380308135336276614282806444486645238749</span>
+<span class="s">30358907296290491560440772390713810515859307960866</span>
+<span class="s">70172427121883998797908792274921901699720888093776</span>
+<span class="s">65727333001053367881220235421809751254540594752243</span>
+<span class="s">52584907711670556013604839586446706324415722155397</span>
+<span class="s">53697817977846174064955149290862569321978468622482</span>
+<span class="s">83972241375657056057490261407972968652414535100474</span>
+<span class="s">82166370484403199890008895243450658541227588666881</span>
+<span class="s">16427171479924442928230863465674813919123162824586</span>
+<span class="s">17866458359124566529476545682848912883142607690042</span>
+<span class="s">24219022671055626321111109370544217506941658960408</span>
+<span class="s">07198403850962455444362981230987879927244284909188</span>
+<span class="s">84580156166097919133875499200524063689912560717606</span>
+<span class="s">05886116467109405077541002256983155200055935729725</span>
+<span class="s">71636269561882670428252483600823257530420752963450</span>
+<span class="s">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="p">)</span>
+
+<span class="k">assert</span> <span class="mi">1000</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">digits</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Break the digit string into substrings of a given length.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">digit_tuples</span><span class="p">(</span> <span class="n">digits</span><span class="p">,</span> <span class="n">n</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Peel apart the digits and convert to substrings of length n.</span>
+<span class="sd">    Map each substring to a tuple of integer values.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler08 import digit_tuples, digits</span>
+<span class="sd">    &gt;&gt;&gt; list( digit_tuples( digits, 5 ) ) # doctest: +ELLIPSIS</span>
+<span class="sd">    [(7, 3, 1, 6, 7), ... (6, 3, 4, 5, 0)]</span>
+<span class="sd">    &gt;&gt;&gt; list( digit_tuples( digits, 13 ) ) # doctest: +ELLIPSIS</span>
+<span class="sd">    [(7, 3, 1, 6, 7, 1, 7, 6, 5, 3, 1, 3, 3), ..., (0, 4, 2, 0, 7, 5, 2, 9, 6, 3, 4, 5, 0)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">combos</span> <span class="o">=</span> <span class="p">(</span> <span class="n">digits</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">digits</span><span class="p">)</span><span class="o">-</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span><span class="n">c</span><span class="p">))</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">combos</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute products from each tuple in the sequence of digits.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">max_prods</span><span class="p">(</span> <span class="n">tuple_iter</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert all digit lists into products, return just the max.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler08 import max_prods</span>
+<span class="sd">    &gt;&gt;&gt; max_prods( [(4,0,3,1), (9,9,8,9), (0,0,0,8)] )</span>
+<span class="sd">    5832</span>
+<span class="sd">    &gt;&gt;&gt; max_prods( digit_tuples( digits, 4 ) )</span>
+<span class="sd">    5832</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">prods</span> <span class="o">=</span> <span class="p">(</span> <span class="n">euler05</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tuple_iter</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">prods</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span> <span class="n">euler05</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute each of the two versions of the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer5</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">max_prods</span><span class="p">(</span> <span class="n">digit_tuples</span><span class="p">(</span><span class="n">digits</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">answer13</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">max_prods</span><span class="p">(</span> <span class="n">digit_tuples</span><span class="p">(</span><span class="n">digits</span><span class="p">,</span> <span class="mi">13</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Confirm the old version.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans5</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans5</span> <span class="o">==</span> <span class="mi">40824</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans5</span><span class="o">=</span> <span class="n">answer5</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans5</span><span class="p">)</span>
+    <span class="n">ans13</span><span class="o">=</span> <span class="n">answer13</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The greatest product of five consecutive digits in the 1000-digit number:&quot;</span><span class="p">,</span> <span class="n">ans5</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The greatest product of thirteen consecutive digits in the 1000-digit number:&quot;</span><span class="p">,</span> <span class="n">ans13</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler07.html" title="previous chapter">10001st prime</a></li>
+      <li>Next: <a href="euler09.html" title="next chapter">Special Pythagorean triplet</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler08.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler08.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

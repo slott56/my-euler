@@ -1,0 +1,541 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Poker hands &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Lychrel numbers" href="euler55.html" />
+    <link rel="prev" title="Combinatoric selections" href="euler53.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="poker-hands">
+<h1>Poker hands<a class="headerlink" href="#poker-hands" title="Permalink to this headline">¶</a></h1>
+<p>Problem 54</p>
+<p>In the card game poker, a hand consists of five cards and are ranked,
+from lowest to highest, in the following way:</p>
+<ul class="simple">
+<li>High Card: Highest value card.</li>
+<li>One Pair: Two cards of the same value.</li>
+<li>Two Pairs: Two different pairs.</li>
+<li>Three of a Kind: Three cards of the same value.</li>
+<li>Straight: All cards are consecutive values.</li>
+<li>Flush: All cards of the same suit.</li>
+<li>Full House: Three of a kind and a pair.</li>
+<li>Four of a Kind: Four cards of the same value.</li>
+<li>Straight Flush: All cards are consecutive values of same suit.</li>
+<li>Royal Flush: Ten, Jack, Queen, King, Ace, in same suit.</li>
+</ul>
+<p>The cards are valued in the order:</p>
+<blockquote>
+<div>2, 3, 4, 5, 6, 7, 8, 9, 10, Jack, Queen, King, Ace.</div></blockquote>
+<p>If two players have the same ranked hands then the rank made up of the
+highest value wins; for example, a pair of eights beats a pair of fives
+(see example 1 below). But if two ranks tie, for example, both players
+have a pair of queens, then highest cards in each hand are compared (see
+example 4 below); if the highest cards tie then the next highest cards
+are compared, and so on.</p>
+<p>Consider the following five hands dealt to two players:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Hand</th>
+<th class="head">Player 1</th>
+<th class="head">Player 2</th>
+<th class="head">Winner</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1</td>
+<td>5H 5C 6S 7S KD; Pair of Fives</td>
+<td>2C 3S 8S 8D TD; Pair of Eights</td>
+<td>Player 2</td>
+</tr>
+<tr class="row-odd"><td>2</td>
+<td>5D 8C 9S JS AC; Highest card Ace</td>
+<td>2C 5C 7D 8S QH; Highest card Queen</td>
+<td>Player 1</td>
+</tr>
+<tr class="row-even"><td>3</td>
+<td>2D 9C AS AH AC; Three Aces</td>
+<td>3D 6D 7D TD QD; Flush with Diamonds</td>
+<td>Player 2</td>
+</tr>
+<tr class="row-odd"><td>4</td>
+<td>4D 6S 9H QH QC; Pair of Queens; Highest card Nine</td>
+<td>3D 6D 7H QD QS; Pair of Queens; Highest card Seven</td>
+<td>Player 1</td>
+</tr>
+<tr class="row-even"><td>5</td>
+<td>2H 2D 4C 4D 4S; Full House; With Three Fours</td>
+<td>3C 3D 3S 9S 9D; Full House; with Three Threes</td>
+<td>Player 1</td>
+</tr>
+</tbody>
+</table>
+<p>The file, <a class="reference external" href="http://projecteuler.net/project/poker.txt">poker.txt</a>, contains one-thousand random hands dealt to two
+players. Each line of the file contains ten cards (separated by a single
+space): the first five are Player 1&#8217;s cards and the last five are Player
+2&#8217;s cards. You can assume that all hands are valid (no invalid
+characters or repeated cards), each player&#8217;s hand is in no specific
+order, and in each hand there is a clear winner.</p>
+<p>How many hands does Player 1 win?</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler54"></span><div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">urllib.request</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+</pre></div>
+</div>
+<p>Card ranks: we&#8217;ll use this to translate the input cards
+into more useful numeric orders for ranking.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">rank_code</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="p">((</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">10</span><span class="p">)),</span>
+    <span class="n">T</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">J</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
+    <span class="n">Q</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+    <span class="n">K</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span>
+    <span class="n">A</span><span class="o">=</span><span class="mi">14</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>A super-simple class for a playing card.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Card</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span> <span class="s">&quot;Card&quot;</span><span class="p">,</span> <span class="s">&quot;rank,suit&quot;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>When we want to properly order a card, we&#8217;ll extract
+the rank. This <em>should</em> be a method function or a
+property of the <code class="xref py py-class docutils literal"><span class="pre">Card</span></code> class.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">order</span><span class="p">(</span> <span class="n">card</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">card</span><span class="o">.</span><span class="n">rank</span>
+</pre></div>
+</div>
+<p>A factory function to create a Card from a string.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">to_card</span><span class="p">(</span> <span class="n">string</span> <span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="n">rank</span><span class="p">,</span> <span class="n">suit</span> <span class="o">=</span> <span class="n">string</span>
+    <span class="k">return</span> <span class="n">Card</span><span class="p">(</span> <span class="n">rank_code</span><span class="p">[</span><span class="n">rank</span><span class="p">],</span> <span class="n">suit</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>A factory function to create a hand of cards from a sequence of string
+card representations.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">to_hand</span><span class="p">(</span> <span class="n">strings</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Hand is a tuple of Card instances sorted from low to high.&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span>
+    <span class="n">hand</span><span class="o">=</span> <span class="p">[</span><span class="n">to_card</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">]</span>
+    <span class="n">hand</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span> <span class="c"># Ascending order by rank. hand[4] is high card.</span>
+    <span class="k">assert</span> <span class="n">order</span><span class="p">(</span><span class="n">hand</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="n">order</span><span class="p">(</span><span class="n">hand</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">hand</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Is this hand a flush?</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">flush</span><span class="p">(</span> <span class="n">hand</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span> <span class="n">c</span><span class="o">.</span><span class="n">suit</span> <span class="o">==</span> <span class="n">hand</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">suit</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">hand</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Is this hand a straight?</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">straight</span><span class="p">(</span> <span class="n">hand</span> <span class="p">):</span>
+    <span class="c">#print( &quot;straight&quot;, tuple(c.rank-hand[0].rank for c in hand) )</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">rank</span><span class="o">-</span><span class="n">hand</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rank</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">hand</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A simple class to save the kinds of matching cards in a Hand.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Match</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span> <span class="s">&quot;Match&quot;</span><span class="p">,</span> <span class="s">&quot;count,card&quot;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>An iterator which yields the Match instances found in a Hand.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">match_iter</span><span class="p">(</span> <span class="n">hand</span> <span class="p">):</span>
+    <span class="n">fq</span><span class="p">,</span> <span class="n">c0</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">hand</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">hand</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="n">c0</span><span class="o">.</span><span class="n">rank</span><span class="p">:</span>
+            <span class="n">fq</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">Match</span><span class="p">(</span> <span class="n">fq</span><span class="p">,</span> <span class="n">c0</span> <span class="p">)</span>
+            <span class="n">fq</span><span class="p">,</span> <span class="n">c0</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">c</span>
+    <span class="k">yield</span> <span class="n">Match</span><span class="p">(</span><span class="n">fq</span><span class="p">,</span> <span class="n">c0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The final list of Match instances, sorted.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">matches</span><span class="p">(</span><span class="n">hand</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A list of Match instances sorted</span>
+<span class="sd">    from most frequent to least frequent.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">match_iter</span><span class="p">(</span><span class="n">hand</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Create a numeric score to summarize the value of a hand.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">score_int</span><span class="p">(</span> <span class="n">hand</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create numeric scores that includes the hand and one or two cards.</span>
+
+<span class="sd">    High Card: Highest value card. 100*card</span>
+<span class="sd">    One Pair: Two cards of the same value. 10000+100*card</span>
+<span class="sd">    Two Pairs: Two different pairs. 20000+100*card+card</span>
+<span class="sd">    Three of a Kind: Three cards of the same value. 30000+100*card</span>
+<span class="sd">    Straight: All cards are consecutive values. 40000+100*card</span>
+<span class="sd">    Flush: All cards of the same suit. 50000+100*card</span>
+<span class="sd">    Full House: Three of a kind and a pair. 60000+100*card+card</span>
+<span class="sd">    Four of a Kind: Four cards of the same value. 70000+100*card</span>
+<span class="sd">    Straight Flush: All cards are consecutive values of same suit. 80000+100*card</span>
+<span class="sd">    Royal Flush: Ten, Jack, Queen, King, Ace, in same suit.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">matches</span><span class="p">(</span><span class="n">hand</span><span class="p">)</span>
+    <span class="c">#print( m )</span>
+    <span class="c">#royal_flush -- a special case of straight flush.</span>
+    <span class="k">if</span> <span class="n">flush</span><span class="p">(</span><span class="n">hand</span><span class="p">)</span> <span class="ow">and</span> <span class="n">straight</span><span class="p">(</span><span class="n">hand</span><span class="p">)</span> <span class="ow">and</span> <span class="n">hand</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">14</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">80000</span> <span class="o">+</span> <span class="mi">100</span><span class="o">*</span><span class="n">order</span><span class="p">(</span><span class="n">hand</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+    <span class="c">#straight_flush</span>
+    <span class="k">elif</span> <span class="n">flush</span><span class="p">(</span><span class="n">hand</span><span class="p">)</span> <span class="ow">and</span> <span class="n">straight</span><span class="p">(</span><span class="n">hand</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">80000</span> <span class="o">+</span> <span class="mi">100</span><span class="o">*</span><span class="n">order</span><span class="p">(</span><span class="n">hand</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+    <span class="c">#four_of_a_kind</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">70000</span> <span class="o">+</span> <span class="mi">100</span><span class="o">*</span><span class="n">order</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="p">)</span>
+    <span class="c">#full_house</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">60000</span> <span class="o">+</span> <span class="mi">100</span><span class="o">*</span><span class="n">order</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="p">)</span> <span class="o">+</span> <span class="n">order</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="p">)</span>
+    <span class="c">#flush</span>
+    <span class="k">elif</span> <span class="n">flush</span><span class="p">(</span><span class="n">hand</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">50000</span> <span class="o">+</span> <span class="mi">100</span><span class="o">*</span><span class="n">order</span><span class="p">(</span><span class="n">hand</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+    <span class="c">#straight</span>
+    <span class="k">elif</span> <span class="n">straight</span><span class="p">(</span><span class="n">hand</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">40000</span> <span class="o">+</span> <span class="mi">100</span><span class="o">*</span><span class="n">order</span><span class="p">(</span><span class="n">hand</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+    <span class="c">#three_of_a_kind</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">30000</span> <span class="o">+</span> <span class="mi">100</span><span class="o">*</span><span class="n">order</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="p">)</span>
+    <span class="c">#two_pair</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">20000</span> <span class="o">+</span> <span class="mi">100</span><span class="o">*</span><span class="n">order</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="p">)</span> <span class="o">+</span> <span class="n">order</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="p">)</span>
+    <span class="c">#one_pair</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">10000</span> <span class="o">+</span> <span class="mi">100</span><span class="o">*</span><span class="n">order</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="p">)</span> <span class="o">+</span> <span class="n">order</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="p">)</span>
+    <span class="c"># Simple high card. Is this adequate? We&#39;ll know if we get ties.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span>         <span class="mi">100</span><span class="o">*</span><span class="n">order</span><span class="p">(</span><span class="n">hand</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="c"># or 100*order(m[0].card)</span>
+</pre></div>
+</div>
+<p>Create a scoring tuple: the numeric score and the
+one or two relevant ranks required to disambiguate ties
+in the numeric score.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">score_tuple</span><span class="p">(</span> <span class="n">hand</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create score tuples of (number, rank, rank)</span>
+
+<span class="sd">    High Card: Highest value card. (0,rank)</span>
+<span class="sd">    One Pair: Two cards of the same value. (1,rank)</span>
+<span class="sd">    Two Pairs: Two different pairs. (2,rank,rank)</span>
+<span class="sd">    Three of a Kind: Three cards of the same value. (3,rank)</span>
+<span class="sd">    Straight: All cards are consecutive values. (4,rank)</span>
+<span class="sd">    Flush: All cards of the same suit. (5,rank)</span>
+<span class="sd">    Full House: Three of a kind and a pair. (6,rank,rank)</span>
+<span class="sd">    Four of a Kind: Four cards of the same value. (7,rank)</span>
+<span class="sd">    Straight Flush: All cards are consecutive values of same suit. (8,rank)</span>
+<span class="sd">    Royal Flush: Ten, Jack, Queen, King, Ace, in same suit.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler54 import score_tuple, to_hand</span>
+<span class="sd">    &gt;&gt;&gt; score_tuple(to_hand(&quot;2C 4D 6H 8S TC&quot;.split()))</span>
+<span class="sd">    (0, 10, 0)</span>
+<span class="sd">    &gt;&gt;&gt; score_tuple(to_hand(&quot;TD 4D 6H 8S TC&quot;.split()))</span>
+<span class="sd">    (1, 10, 8)</span>
+<span class="sd">    &gt;&gt;&gt; score_tuple(to_hand(&quot;TD 8D 6H 8S TC&quot;.split()))</span>
+<span class="sd">    (2, 10, 8)</span>
+<span class="sd">    &gt;&gt;&gt; score_tuple(to_hand(&quot;TD 8D TH 6S TC&quot;.split()))</span>
+<span class="sd">    (3, 10, 0)</span>
+<span class="sd">    &gt;&gt;&gt; score_tuple(to_hand(&quot;TD 8D 9H 7S 6C&quot;.split()))</span>
+<span class="sd">    (4, 10, 0)</span>
+<span class="sd">    &gt;&gt;&gt; score_tuple(to_hand(&quot;TD 8D 9D 6D 2D&quot;.split()))</span>
+<span class="sd">    (5, 10, 0)</span>
+<span class="sd">    &gt;&gt;&gt; score_tuple(to_hand(&quot;TD TS 8S 8D TC&quot;.split()))</span>
+<span class="sd">    (6, 10, 8)</span>
+<span class="sd">    &gt;&gt;&gt; score_tuple(to_hand(&quot;TD TS TC TH 8C&quot;.split()))</span>
+<span class="sd">    (7, 10, 0)</span>
+<span class="sd">    &gt;&gt;&gt; score_tuple(to_hand(&quot;TD 6D 8D 7D 9D&quot;.split()))</span>
+<span class="sd">    (8, 10, 0)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">matches</span><span class="p">(</span><span class="n">hand</span><span class="p">)</span>
+    <span class="c">#print( m )</span>
+    <span class="c">#royal_flush -- a special case of straight flush.</span>
+    <span class="k">if</span> <span class="n">flush</span><span class="p">(</span><span class="n">hand</span><span class="p">)</span> <span class="ow">and</span> <span class="n">straight</span><span class="p">(</span><span class="n">hand</span><span class="p">)</span> <span class="ow">and</span> <span class="n">hand</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">14</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">hand</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c">#straight_flush</span>
+    <span class="k">elif</span> <span class="n">flush</span><span class="p">(</span><span class="n">hand</span><span class="p">)</span> <span class="ow">and</span> <span class="n">straight</span><span class="p">(</span><span class="n">hand</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">hand</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c">#four_of_a_kind</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c">#full_house</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="o">.</span><span class="n">rank</span><span class="p">)</span>
+    <span class="c">#flush</span>
+    <span class="k">elif</span> <span class="n">flush</span><span class="p">(</span><span class="n">hand</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">hand</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c">#straight</span>
+    <span class="k">elif</span> <span class="n">straight</span><span class="p">(</span><span class="n">hand</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">hand</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c">#three_of_a_kind</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c">#two_pair</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="o">.</span><span class="n">rank</span><span class="p">)</span>
+    <span class="c">#one_pair</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">card</span><span class="o">.</span><span class="n">rank</span><span class="p">)</span>
+    <span class="c"># Simple high card. Is this adequate? We&#39;ll know if we get ties.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">hand</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="c"># or (0, m[0].card.rank, 0)</span>
+
+<span class="k">def</span> <span class="nf">score_hands</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; from euler54 import score_hands</span>
+<span class="sd">    &gt;&gt;&gt; outcome= score_hands()</span>
+<span class="sd">    &gt;&gt;&gt; outcome[1]</span>
+<span class="sd">    376</span>
+<span class="sd">    &gt;&gt;&gt; outcome[2]</span>
+<span class="sd">    624</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#&quot;http://projecteuler.net/project/poker.txt&quot;</span>
+    <span class="n">poker_txt</span><span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span> <span class="s">&quot;file:poker.txt&quot;</span> <span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&quot;ASCII&quot;</span><span class="p">)</span>
+    <span class="n">outcome</span><span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">poker_txt</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span> <span class="k">continue</span>
+        <span class="n">cards</span><span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">cards</span><span class="p">)</span> <span class="o">==</span> <span class="mi">10</span>
+        <span class="n">h_1</span> <span class="o">=</span> <span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[:</span><span class="mi">5</span><span class="p">])</span>
+        <span class="n">h_2</span> <span class="o">=</span> <span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[</span><span class="mi">5</span><span class="p">:])</span>
+        <span class="n">s_1</span><span class="o">=</span> <span class="n">score_tuple</span><span class="p">(</span><span class="n">h_1</span><span class="p">)</span>
+        <span class="n">s_2</span><span class="o">=</span> <span class="n">score_tuple</span><span class="p">(</span><span class="n">h_2</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">s_1</span> <span class="o">!=</span> <span class="n">s_2</span><span class="p">,</span> <span class="s">&quot;Problem scoring {0!r} {1!r}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">h_1</span><span class="p">,</span><span class="n">h_2</span><span class="p">)</span>
+        <span class="n">winner</span><span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">s_1</span> <span class="o">&gt;</span> <span class="n">s_2</span> <span class="k">else</span> <span class="mi">2</span>
+        <span class="c"># The most obscure case:</span>
+        <span class="c"># if s_1[:2] == s_2[:2]:</span>
+        <span class="c">#     print( &quot;Close&quot;, cards[:5], s_1, cards[5:], s_2, winner )</span>
+        <span class="n">outcome</span><span class="p">[</span><span class="n">winner</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c"># Paranoid double check on two scoring systems.</span>
+        <span class="k">if</span> <span class="n">score_int</span><span class="p">(</span><span class="n">h_1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">score_int</span><span class="p">(</span><span class="n">h_2</span><span class="p">)</span> <span class="k">if</span> <span class="n">winner</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">score_int</span><span class="p">(</span><span class="n">h_1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">score_int</span><span class="p">(</span><span class="n">h_2</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span> <span class="s">&quot;{!r} {!r} Player {:d}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cards</span><span class="p">[:</span><span class="mi">5</span><span class="p">],</span><span class="n">cards</span><span class="p">[</span><span class="mi">5</span><span class="p">:],</span><span class="n">winner</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span> <span class="n">s_1</span><span class="p">,</span> <span class="s">&quot;:&quot;</span><span class="p">,</span> <span class="n">s_2</span> <span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span> <span class="n">score_int</span><span class="p">(</span><span class="n">h_1</span><span class="p">),</span> <span class="n">score_int</span><span class="p">(</span><span class="n">h_2</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span> <span class="s">&quot;Logic Problem&quot;</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">outcome</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    The most obscure case in the input file.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler54 import score_tuple, to_hand</span>
+<span class="sd">    &gt;&gt;&gt; s_1= score_tuple(to_hand([&#39;6D&#39;, &#39;7C&#39;, &#39;5D&#39;, &#39;5H&#39;, &#39;3S&#39;]))</span>
+<span class="sd">    &gt;&gt;&gt; s_1</span>
+<span class="sd">    (1, 5, 7)</span>
+<span class="sd">    &gt;&gt;&gt; s_2= score_tuple(to_hand([&#39;5C&#39;, &#39;JC&#39;, &#39;2H&#39;, &#39;5S&#39;, &#39;3D&#39;]))</span>
+<span class="sd">    &gt;&gt;&gt; s_2</span>
+<span class="sd">    (1, 5, 11)</span>
+<span class="sd">    &gt;&gt;&gt; winner= 1 if s_1 &gt; s_2 else 2</span>
+<span class="sd">    &gt;&gt;&gt; winner</span>
+<span class="sd">    2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">test_int</span><span class="p">()</span>
+    <span class="n">test_tuple</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">test_int</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">1       5H 5C 6S 7S KD      2C 3S 8S 8D TD      Player 2</span>
+<span class="sd">        Pair of Fives       Pair of Eights</span>
+
+
+<span class="sd">2       5D 8C 9S JS AC      2C 5C 7D 8S QH      Player 1</span>
+<span class="sd">        Highest card Ace    Highest card Queen</span>
+
+
+<span class="sd">3       2D 9C AS AH AC      3D 6D 7D TD QD      Player 2</span>
+<span class="sd">        Three Aces          Flush with Diamonds</span>
+
+
+<span class="sd">4       4D 6S 9H QH QC      3D 6D 7H QD QS      Player 1</span>
+<span class="sd">        Pair of Queens      Pair of Queens</span>
+<span class="sd">        Highest card Nine   Highest card Seven</span>
+
+
+<span class="sd">5       2H 2D 4C 4D 4S      3C 3D 3S 9S 9D      Player 1</span>
+<span class="sd">        Full House          Full House</span>
+<span class="sd">        With Three Fours    with Three Threes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cards</span><span class="o">=</span> <span class="s">&quot;5H 5C 6S 7S KD      2C 3S 8S 8D TD&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">h1</span><span class="p">,</span> <span class="n">h2</span> <span class="o">=</span> <span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[:</span><span class="mi">5</span><span class="p">]),</span> <span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[</span><span class="mi">5</span><span class="p">:])</span>
+    <span class="n">s_h1</span><span class="p">,</span> <span class="n">s_h2</span> <span class="o">=</span> <span class="n">score_int</span><span class="p">(</span><span class="n">h1</span><span class="p">),</span> <span class="n">score_int</span><span class="p">(</span><span class="n">h2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">==</span> <span class="mi">10000</span><span class="o">+</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="mi">13</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h2</span> <span class="o">==</span> <span class="mi">10000</span><span class="o">+</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">&lt;</span> <span class="n">s_h2</span>
+
+    <span class="n">cards</span><span class="o">=</span> <span class="s">&quot;5D 8C 9S JS AC          2C 5C 7D 8S QH&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">s_h1</span><span class="p">,</span> <span class="n">s_h2</span> <span class="o">=</span> <span class="n">score_int</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[:</span><span class="mi">5</span><span class="p">])),</span> <span class="n">score_int</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[</span><span class="mi">5</span><span class="p">:]))</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">==</span> <span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h2</span> <span class="o">==</span> <span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">&gt;</span> <span class="n">s_h2</span>
+
+    <span class="n">cards</span><span class="o">=</span> <span class="s">&quot;2D 9C AS AH AC      3D 6D 7D TD QD&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">s_h1</span><span class="p">,</span> <span class="n">s_h2</span> <span class="o">=</span> <span class="n">score_int</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[:</span><span class="mi">5</span><span class="p">])),</span> <span class="n">score_int</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[</span><span class="mi">5</span><span class="p">:]))</span>
+    <span class="c">#print( h1, &quot;=&quot;, s_h1, &quot;:&quot;, h2, &quot;=&quot;, s_h2 )</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">==</span> <span class="mi">30000</span><span class="o">+</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h2</span> <span class="o">==</span> <span class="mi">50000</span><span class="o">+</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">&lt;</span> <span class="n">s_h2</span>
+
+    <span class="n">cards</span><span class="o">=</span> <span class="s">&quot;4D 6S 9H QH QC      3D 6D 7H QD QS&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">s_h1</span><span class="p">,</span> <span class="n">s_h2</span> <span class="o">=</span> <span class="n">score_int</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[:</span><span class="mi">5</span><span class="p">])),</span> <span class="n">score_int</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[</span><span class="mi">5</span><span class="p">:]))</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">==</span> <span class="mi">10000</span><span class="o">+</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h2</span> <span class="o">==</span> <span class="mi">10000</span><span class="o">+</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">&gt;</span> <span class="n">s_h2</span>
+
+    <span class="n">cards</span><span class="o">=</span> <span class="s">&quot;2H 2D 4C 4D 4S      3C 3D 3S 9S 9D&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">s_h1</span><span class="p">,</span> <span class="n">s_h2</span> <span class="o">=</span> <span class="n">score_int</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[:</span><span class="mi">5</span><span class="p">])),</span> <span class="n">score_int</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[</span><span class="mi">5</span><span class="p">:]))</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">==</span> <span class="mi">60000</span><span class="o">+</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h2</span> <span class="o">==</span> <span class="mi">60000</span><span class="o">+</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">&gt;</span> <span class="n">s_h2</span>
+
+<span class="k">def</span> <span class="nf">test_tuple</span><span class="p">():</span>
+    <span class="n">cards</span><span class="o">=</span> <span class="s">&quot;5H 5C 6S 7S KD      2C 3S 8S 8D TD&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">h1</span><span class="p">,</span> <span class="n">h2</span> <span class="o">=</span> <span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[:</span><span class="mi">5</span><span class="p">]),</span> <span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[</span><span class="mi">5</span><span class="p">:])</span>
+    <span class="n">s_h1</span><span class="p">,</span> <span class="n">s_h2</span> <span class="o">=</span> <span class="n">score_tuple</span><span class="p">(</span><span class="n">h1</span><span class="p">),</span> <span class="n">score_tuple</span><span class="p">(</span><span class="n">h2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">13</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h2</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">&lt;</span> <span class="n">s_h2</span>
+
+    <span class="n">cards</span><span class="o">=</span> <span class="s">&quot;5D 8C 9S JS AC          2C 5C 7D 8S QH&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">s_h1</span><span class="p">,</span> <span class="n">s_h2</span> <span class="o">=</span> <span class="n">score_tuple</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[:</span><span class="mi">5</span><span class="p">])),</span> <span class="n">score_tuple</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[</span><span class="mi">5</span><span class="p">:]))</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h2</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">&gt;</span> <span class="n">s_h2</span>
+
+    <span class="n">cards</span><span class="o">=</span> <span class="s">&quot;2D 9C AS AH AC      3D 6D 7D TD QD&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">s_h1</span><span class="p">,</span> <span class="n">s_h2</span> <span class="o">=</span> <span class="n">score_tuple</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[:</span><span class="mi">5</span><span class="p">])),</span> <span class="n">score_tuple</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[</span><span class="mi">5</span><span class="p">:]))</span>
+    <span class="c">#print( h1, &quot;=&quot;, s_h1, &quot;:&quot;, h2, &quot;=&quot;, s_h2 )</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h2</span> <span class="o">==</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">&lt;</span> <span class="n">s_h2</span>
+
+    <span class="n">cards</span><span class="o">=</span> <span class="s">&quot;4D 6S 9H QH QC      3D 6D 7H QD QS&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">s_h1</span><span class="p">,</span> <span class="n">s_h2</span> <span class="o">=</span> <span class="n">score_tuple</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[:</span><span class="mi">5</span><span class="p">])),</span> <span class="n">score_tuple</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[</span><span class="mi">5</span><span class="p">:]))</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h2</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">&gt;</span> <span class="n">s_h2</span>
+
+    <span class="n">cards</span><span class="o">=</span> <span class="s">&quot;2H 2D 4C 4D 4S      3C 3D 3S 9S 9D&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">s_h1</span><span class="p">,</span> <span class="n">s_h2</span> <span class="o">=</span> <span class="n">score_tuple</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[:</span><span class="mi">5</span><span class="p">])),</span> <span class="n">score_tuple</span><span class="p">(</span><span class="n">to_hand</span><span class="p">(</span><span class="n">cards</span><span class="p">[</span><span class="mi">5</span><span class="p">:]))</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">==</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h2</span> <span class="o">==</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s_h1</span> <span class="o">&gt;</span> <span class="n">s_h2</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">outcome</span><span class="o">=</span> <span class="n">score_hands</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">outcome</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">376</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The number of hands player 1 wins:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler53.html" title="previous chapter">Combinatoric selections</a></li>
+      <li>Next: <a href="euler55.html" title="next chapter">Lychrel numbers</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler54.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler54.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

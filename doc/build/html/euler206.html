@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Concealed Square &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Prime generating integers" href="euler357.html" />
+    <link rel="prev" title="Largest exponential" href="euler99.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="concealed-square">
+<h1>Concealed Square<a class="headerlink" href="#concealed-square" title="Permalink to this headline">¶</a></h1>
+<p>Problem 206</p>
+<p>Find the unique positive integer whose square has the form 1_2_3_4_5_6_7_8_9_0,
+where each “_” is a single digit.</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler206"></span><p>Generate squares which have 19 digits, in the range 10... to 19...
+These will be in the range
+<img class="math" src="_images/math/a4e43a0512155231f4d8166f2d1f90f7fb8cd4d9.png" alt="1020304050607080900 \leq x^2 \leq :math:"/>sqrt 1929394959697989990`</p>
+<p>A search of all of these candidate values for <img class="math" src="_images/math/188c175aac0a8a9c22499336711b5d7256407254.png" alt="x"/> is
+a search space of 378,925,613 values, all of which are proper squares.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">time</span>
+</pre></div>
+</div>
+<p>Digits of a large number.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">digits</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Digits as a list, reversed.</span>
+
+<span class="sd">    &gt;&gt;&gt; d=list(digits(1020304050607080900))</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    [0, 0, 9, 0, 8, 0, 7, 0, 6, 0, 5, 0, 4, 0, 3, 0, 2, 0, 1]</span>
+<span class="sd">    &gt;&gt;&gt; d[::-2]</span>
+<span class="sd">    [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">while</span> <span class="n">x</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">10</span>
+        <span class="n">x</span> <span class="o">//=</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p>Fixed-length digits of a large number.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">ndigits</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">9</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; d=list(ndigits(0, 9))</span>
+<span class="sd">    &gt;&gt;&gt; d</span>
+<span class="sd">    [0, 0, 0, 0, 0, 0, 0, 0, 0]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">10</span>
+        <span class="n">x</span> <span class="o">//=</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p>Is this sequence of digits a valid hidden square?</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">islice</span>
+<span class="k">def</span> <span class="nf">hidden_square1</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Slower check using iterators.</span>
+
+<span class="sd">    &gt;&gt;&gt; hidden_square1(1020304050607080900)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; hidden_square1(1929394959697989990)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; tuple(islice(digits(1020304050607080900), 0, None, 2))</span>
+<span class="sd">    (0, 9, 8, 7, 6, 5, 4, 3, 2, 1)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">alternating</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">islice</span><span class="p">(</span><span class="n">digits</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">alternating</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">hidden_square2</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fast check using string conversion.</span>
+
+<span class="sd">    &gt;&gt;&gt; hidden_square2(1020304050607080900)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; hidden_square2(1929394959697989990)</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">chars</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)[::</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">chars</span> <span class="o">==</span> <span class="s">&#39;1234567890&#39;</span>
+
+<span class="k">def</span> <span class="nf">hidden_square3</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fast check using string conversion and more complex logic;</span>
+<span class="sd">    interestingly, it&#39;s slower.</span>
+
+<span class="sd">    &gt;&gt;&gt; hidden_square3(1020304050607080900)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; hidden_square3(1929394959697989990)</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">chars</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">chars</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="o">==</span> <span class="s">&#39;1&#39;</span> <span class="ow">and</span>
+        <span class="n">chars</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="o">==</span> <span class="s">&#39;2&#39;</span> <span class="ow">and</span>
+        <span class="n">chars</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>  <span class="o">==</span> <span class="s">&#39;3&#39;</span> <span class="ow">and</span>
+        <span class="n">chars</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>  <span class="o">==</span> <span class="s">&#39;4&#39;</span> <span class="ow">and</span>
+        <span class="n">chars</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>  <span class="o">==</span> <span class="s">&#39;5&#39;</span> <span class="ow">and</span>
+        <span class="n">chars</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;6&#39;</span> <span class="ow">and</span>
+        <span class="n">chars</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;7&#39;</span> <span class="ow">and</span>
+        <span class="n">chars</span><span class="p">[</span><span class="mi">14</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;8&#39;</span> <span class="ow">and</span>
+        <span class="n">chars</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;9&#39;</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute an answer &#8211; largish search space of 378,925,613</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer1</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Enumerate all 378,925,613 values.</span>
+<span class="sd">    About 1,000,000 per second takes at most 378 seconds or 5 minutes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">start</span><span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+    <span class="n">low</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1020304050607080900</span><span class="p">))</span>
+    <span class="n">high</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1929394959697989990</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)):</span>
+        <span class="c">#if n % 10000 == 0: print(n, int(n/(time.perf_counter()-start)), x**2, )</span>
+        <span class="k">if</span> <span class="n">hidden_square2</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">):</span>
+            <span class="c">#print( &quot;Examined {0}, {1:.2f}s: {2}&quot;.format(n, time.perf_counter()-start, x**2) )</span>
+            <span class="k">return</span> <span class="n">x</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span> <span class="n">ans</span> <span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">1389019170</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Performance question.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">performance</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">timeit</span>
+    <span class="n">t1</span><span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span> <span class="s">&#39;hidden_square1(1020304050607080900)&#39;</span><span class="p">,</span> <span class="s">&#39;from euler206 import hidden_square1&#39;</span> <span class="p">)</span>
+    <span class="n">t2</span><span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span> <span class="s">&#39;hidden_square2(1020304050607080900)&#39;</span><span class="p">,</span> <span class="s">&#39;from euler206 import hidden_square2&#39;</span> <span class="p">)</span>
+    <span class="n">t3</span><span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span> <span class="s">&#39;hidden_square3(1020304050607080900)&#39;</span><span class="p">,</span> <span class="s">&#39;from euler206 import hidden_square3&#39;</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;digits {t1}, string {t2}, string {t3}&quot;</span><span class="o">.</span><span class="n">format_map</span><span class="p">(</span><span class="nb">locals</span><span class="p">()))</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">doctest</span><span class="o">,</span> <span class="nn">sys</span>
+    <span class="n">results</span><span class="o">=</span> <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">results</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">failed</span><span class="p">)</span>
+    <span class="c"># performance()</span>
+
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer1</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span> <span class="n">ans</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The unique hidden square:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler99.html" title="previous chapter">Largest exponential</a></li>
+      <li>Next: <a href="euler357.html" title="next chapter">Prime generating integers</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler206.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler206.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

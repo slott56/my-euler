@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Integer right triangles &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Champernowne’s constant" href="euler40.html" />
+    <link rel="prev" title="Pandigital multiples" href="euler38.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="integer-right-triangles">
+<h1>Integer right triangles<a class="headerlink" href="#integer-right-triangles" title="Permalink to this headline">¶</a></h1>
+<p>Problem 39</p>
+<p>If p is the perimeter of a right angle triangle with integral length sides, {a,b,c},
+there are exactly three solutions for p = 120.</p>
+<blockquote>
+<div>{20,48,52}, {24,45,51}, {30,40,50}</div></blockquote>
+<p>For which value of p ≤ 1000, is the number of solutions maximised?</p>
+<p>Define an exception we can raise to exit a loop.</p>
+<dl class="exception">
+<dt id="DomainError">
+<em class="property">exception </em><code class="descname">DomainError</code><a class="headerlink" href="#DomainError" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">The number has no integer square root.</code></dt>
+<dd></dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">DomainError</span><span class="p">(</span> <span class="ne">Exception</span> <span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>An integer square root operation that maps
+numbers from 0 to 1000 to their square root,
+if it&#8217;s an integer. Otherwise, a <a class="reference internal" href="#DomainError" title="DomainError"><code class="xref py py-exc docutils literal"><span class="pre">DomainError</span></code></a> is raised.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">ROOTS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="p">(</span><span class="n">d</span><span class="o">*</span><span class="n">d</span><span class="p">,</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">intSqrt</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Integer square root or :py:exc:`DomainError` if there</span>
+<span class="sd">    is no integer square root.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler39 import intSqrt, DomainError</span>
+<span class="sd">    &gt;&gt;&gt; intSqrt(9)</span>
+<span class="sd">    3</span>
+<span class="sd">    &gt;&gt;&gt; intSqrt(10)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    ...</span>
+<span class="sd">    euler39.DomainError: No integer square root of 10</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ROOTS</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span> <span class="s">&quot;No integer square root of {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Generate right triangles with integral length sides that have the
+required perimeter. It&#8217;s handy to have the details to confirm
+the algorithm. We don&#8217;t really need the tuple, however,
+since all we really want is a count.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">rightTriangles</span><span class="p">(</span> <span class="n">p</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate all possible triangles for a given perimeter.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler39 import rightTriangles</span>
+<span class="sd">    &gt;&gt;&gt; list(rightTriangles(120))</span>
+<span class="sd">    [(20, 48, 52), (24, 45, 51), (30, 40, 50)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">p</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">c</span><span class="o">=</span> <span class="n">intSqrt</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">*</span><span class="n">b</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="n">c</span> <span class="o">==</span> <span class="n">p</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span>
+            <span class="k">except</span> <span class="n">DomainError</span><span class="p">:</span>
+                <span class="k">pass</span>
+</pre></div>
+</div>
+<p>Generate all triangle lists for all perimeter values from 0 to 1000.
+Note that we don&#8217;t really use the triangles themselves; we only
+really wanted the count.</p>
+<p>We might want to define our own <cite>count()</cite> function instead of <cite>len()</cite>.
+<code class="code docutils literal"><span class="pre">sum(</span> <span class="pre">1</span> <span class="pre">for</span> <span class="pre">t</span> <span class="pre">in</span> <span class="pre">rightTriangles(p)</span> <span class="pre">)</span></code> for example, which
+doesn&#8217;t create a list object.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">triangles_for_P_gen</span><span class="p">(</span> <span class="n">limit</span><span class="o">=</span><span class="mi">1000</span> <span class="p">):</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">limit</span><span class="p">):</span>
+        <span class="n">rt</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rightTriangles</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+        <span class="k">yield</span> <span class="nb">len</span><span class="p">(</span><span class="n">rt</span><span class="p">),</span> <span class="n">p</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">rt120</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rightTriangles</span><span class="p">(</span><span class="mi">120</span><span class="p">))</span>
+    <span class="c">#print( rt120 )</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">rt120</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">len_</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span> <span class="n">triangles_for_P_gen</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">840</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create the output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The perimeter with the maximum number of integral length sides:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler38.html" title="previous chapter">Pandigital multiples</a></li>
+      <li>Next: <a href="euler40.html" title="next chapter">Champernowne&#8217;s constant</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler39.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler39.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

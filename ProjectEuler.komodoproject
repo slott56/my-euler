@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Komodo Project File - DO NOT EDIT -->
+<project id="6568eb31-a61e-9844-81d9-1f0cf40c22e2" kpf_version="5" name="ProjectEuler.komodoproject">
+<livefolder id="9e3d69e8-89fa-be4a-b54d-bae9d1c7da03" idref="6568eb31-a61e-9844-81d9-1f0cf40c22e2" name="doc" url="doc">
+</livefolder>
+<preference-set idref="6568eb31-a61e-9844-81d9-1f0cf40c22e2" id="project" preftype="project">
+  <string relative="path" id="import_dirname"></string>
+  <boolean id="import_live">1</boolean>
+  <string id="last_local_directory">None</string>
+  <string id="last_remote_directory">None</string>
+  <long id="prefs_version">1</long>
+  <string id="python3DefaultInterpreter">/Library/Frameworks/Python.framework/Versions/3.4/bin/python3.4</string>
+</preference-set>
+</project>

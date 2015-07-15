@@ -1,0 +1,336 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Square root convergents &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Spiral primes" href="euler58.html" />
+    <link rel="prev" title="Powerful digit sum" href="euler56.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="square-root-convergents">
+<h1>Square root convergents<a class="headerlink" href="#square-root-convergents" title="Permalink to this headline">¶</a></h1>
+<p>Problem 57</p>
+<p>It is possible to show that the square root of two can be expressed as an
+infinite continued fraction.</p>
+<blockquote>
+<div>sqrt(2) = 1 + 1/(2 + 1/(2 + 1/(2 + ... ))) = 1.414213...</div></blockquote>
+<p>By expanding this for the first four iterations, we get:</p>
+<blockquote>
+<div><p>1 + 1/2 = 3/2 = 1.5</p>
+<p>1 + 1/(2 + 1/2) = 7/5 = 1.4</p>
+<p>1 + 1/(2 + 1/(2 + 1/2)) = 17/12 = 1.41666...</p>
+<p>1 + 1/(2 + 1/(2 + 1/(2 + 1/2))) = 41/29 = 1.41379...</p>
+</div></blockquote>
+<p>The next three expansions are 99/70, 239/169, and 577/408, but the eighth
+expansion, 1393/985, is the first example where the number of digits in the
+numerator exceeds the number of digits in the denominator.</p>
+<p>In the first one-thousand expansions, how many fractions contain a numerator
+with more digits than denominator?</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler57"></span><p>We&#8217;ll use <a class="reference internal" href="euler04.html#euler04.digits" title="euler04.digits"><code class="xref py py-func docutils literal"><span class="pre">euler04.digits()</span></code></a>. Plus, we&#8217;ll use the <code class="xref py py-mod docutils literal"><span class="pre">numbers</span></code>
+module so that we can define our own rational fraction.
+We <em>should</em> use <code class="xref py py-class docutils literal"><span class="pre">fractions.Fraction</span></code> for this.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">euler04</span> <span class="kn">import</span> <span class="n">digits</span>
+</pre></div>
+</div>
+<div class="section" id="bad-idea">
+<h2>Bad Idea<a class="headerlink" href="#bad-idea" title="Permalink to this headline">¶</a></h2>
+<p>Here&#8217;s a fairly bad design based on reducing fractions.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numbers</span>
+</pre></div>
+</div>
+<p>Our own class of Rational fractions.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Rational</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">1</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="o">=</span> <span class="n">n</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="o">=</span> <span class="n">d</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">Rational</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">n</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">d</span><span class="o">*</span><span class="n">d</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">Rational</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">d</span><span class="o">*</span><span class="n">n</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">n</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;Can&#39;t make Rational(</span><span class="si">%r</span><span class="s">,</span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">d</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reduce</span><span class="p">()</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_gcd</span><span class="p">(</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span> <span class="p">):</span>
+        <span class="c"># Rewritten as a clumsy-looking set of loops to avoid recursion limit.</span>
+        <span class="k">while</span> <span class="n">p</span> <span class="o">!=</span> <span class="n">q</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="o">&gt;</span> <span class="n">q</span><span class="p">:</span>
+                <span class="k">while</span> <span class="n">p</span> <span class="o">&gt;</span> <span class="n">q</span><span class="p">:</span>
+                    <span class="n">p</span> <span class="o">-=</span> <span class="n">q</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">while</span> <span class="n">q</span> <span class="o">&gt;</span> <span class="n">p</span><span class="p">:</span>
+                    <span class="n">q</span> <span class="o">-=</span> <span class="n">p</span>
+            <span class="n">p</span><span class="p">,</span> <span class="n">q</span> <span class="o">=</span> <span class="n">q</span><span class="p">,</span> <span class="n">p</span>
+        <span class="k">return</span> <span class="n">p</span>
+    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">nn</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="o">=</span> <span class="n">nn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="o">=</span> <span class="mi">1</span>
+        <span class="n">nd</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="o">=</span> <span class="n">nd</span>
+        <span class="c"># Recursion Depth Issue...</span>
+        <span class="n">gcd</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcd</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">gcd</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">//</span> <span class="n">gcd</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">//</span> <span class="n">gcd</span>
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">!=</span> <span class="n">Rational</span><span class="p">:</span>
+            <span class="n">other</span><span class="o">=</span> <span class="n">Rational</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="o">*</span><span class="n">other</span><span class="o">.</span><span class="n">d</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">n</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">*</span> <span class="n">other</span><span class="o">.</span><span class="n">d</span>
+        <span class="k">return</span> <span class="n">Rational</span><span class="p">(</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">!=</span> <span class="n">Rational</span><span class="p">:</span>
+            <span class="n">other</span><span class="o">=</span> <span class="n">Rational</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__add__</span><span class="p">(</span> <span class="n">other</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">!=</span> <span class="n">Rational</span><span class="p">:</span>
+            <span class="n">other</span><span class="o">=</span> <span class="n">Rational</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="o">*</span><span class="n">other</span><span class="o">.</span><span class="n">n</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="o">*</span><span class="n">other</span><span class="o">.</span><span class="n">d</span>
+        <span class="k">return</span> <span class="n">Rational</span><span class="p">(</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__rmul__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">!=</span> <span class="n">Rational</span><span class="p">:</span>
+            <span class="n">other</span><span class="o">=</span> <span class="n">Rational</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mul__</span><span class="p">(</span> <span class="n">other</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__float__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s">/</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">tuple</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__int__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s">&quot;Value is </span><span class="si">%s</span><span class="s">, which is not an integer&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="bp">self</span> <span class="p">)</span> <span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">testRational</span><span class="p">():</span>
+
+    <span class="k">assert</span> <span class="s">&quot;1/2&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="mf">0.5</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="s">&quot;2/3&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s">&quot;1&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s">&quot;4/3&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s">&quot;1/3&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">Rational</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">12</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="s">&quot;4/3&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="s">&quot;2&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">Rational</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+    <span class="k">assert</span> <span class="s">&quot;1/6&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">Rational</span><span class="p">(</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="mi">2</span> <span class="p">))</span>
+    <span class="k">assert</span> <span class="s">&quot;6&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">Rational</span><span class="p">(</span> <span class="mi">2</span><span class="p">,</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="p">))</span>
+
+    <span class="k">assert</span> <span class="mf">1.5</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">assert</span> <span class="mf">1.4</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+    <span class="k">assert</span> <span class="s">&quot;7/5&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span><span class="o">.</span><span class="n">tuple</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">int</span><span class="p">(</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;Value is 1/3, which is not an integer&quot;</span>
+    <span class="k">assert</span> <span class="mi">5</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="s">&quot;3/2&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span> <span class="mi">1</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">genTerm</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="p">)</span>
+    <span class="k">assert</span> <span class="s">&quot;7/5&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span> <span class="mi">1</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">genTerm</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="p">)</span>
+    <span class="k">assert</span> <span class="s">&quot;17/12&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span> <span class="mi">1</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">genTerm</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="p">)</span>
+    <span class="k">assert</span> <span class="s">&quot;41/29&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span> <span class="mi">1</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">genTerm</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="p">)</span>
+    <span class="k">assert</span> <span class="s">&quot;99/70&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span> <span class="mi">1</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">genTerm</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span> <span class="p">)</span>
+    <span class="k">assert</span> <span class="s">&quot;239/169&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span> <span class="mi">1</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">genTerm</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span> <span class="p">)</span>
+    <span class="k">assert</span> <span class="s">&quot;577/408&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span> <span class="mi">1</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">genTerm</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span> <span class="p">)</span>
+    <span class="k">assert</span> <span class="s">&quot;1393/985&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span> <span class="mi">1</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">genTerm</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span> <span class="p">)</span> <span class="c">#  the eighth expansion,</span>
+    <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="p">(</span> <span class="mi">1</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">genTerm</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span> <span class="p">)</span><span class="o">.</span><span class="n">tuple</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">digits</span><span class="p">(</span><span class="n">n</span><span class="p">))</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">digits</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Given the working Rational fractions, we can generate terms.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">genTerm</span><span class="p">(</span> <span class="n">depth</span> <span class="p">):</span>
+    <span class="c"># Also runs afoul of the Python recursion limit :-(</span>
+    <span class="k">if</span> <span class="n">depth</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">2</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">genTerm</span><span class="p">(</span><span class="n">depth</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Here&#8217;s where we try to compute the answer. Slowly.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">lame</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Values get HUGE! and hard to reduce.&quot;&quot;&quot;</span>
+    <span class="n">count</span><span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="p">(</span> <span class="mi">1</span><span class="o">+</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">genTerm</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="p">)</span><span class="o">.</span><span class="n">tuple</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">digits</span><span class="p">(</span><span class="n">n</span><span class="p">))</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">digits</span><span class="p">(</span><span class="n">d</span><span class="p">)):</span>
+            <span class="k">print</span><span class="p">(</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">count</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="good-idea">
+<h2>Good Idea<a class="headerlink" href="#good-idea" title="Permalink to this headline">¶</a></h2>
+<p>This is a much better design. It&#8217;s based on a simple
+observation about the continued fractions being used.
+We have <img class="math" src="_images/math/84d33fe8fc5806aa8a9c21c6387214478e3842cf.png" alt="\frac{n}{d} = \frac{n+d+d}{n+d}"/>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">genTermSimple</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; from euler57 import genTermSimple</span>
+<span class="sd">    &gt;&gt;&gt; g= genTermSimple()</span>
+<span class="sd">    &gt;&gt;&gt; next(g)</span>
+<span class="sd">    (0, 3, 2)</span>
+<span class="sd">    &gt;&gt;&gt; next(g)</span>
+<span class="sd">    (1, 7, 5)</span>
+<span class="sd">    &gt;&gt;&gt; next(g)</span>
+<span class="sd">    (2, 17, 12)</span>
+<span class="sd">    &gt;&gt;&gt; next(g)</span>
+<span class="sd">    (3, 41, 29)</span>
+<span class="sd">    &gt;&gt;&gt; next(g)</span>
+<span class="sd">    (4, 99, 70)</span>
+<span class="sd">    &gt;&gt;&gt; next(g)</span>
+<span class="sd">    (5, 239, 169)</span>
+<span class="sd">    &gt;&gt;&gt; next(g)</span>
+<span class="sd">    (6, 577, 408)</span>
+<span class="sd">    &gt;&gt;&gt; next(g)</span>
+<span class="sd">    (7, 1393, 985)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">n</span><span class="o">+</span><span class="n">d</span><span class="o">+</span><span class="n">d</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="n">d</span>
+        <span class="k">yield</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">testRational</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">count</span><span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">genTermSimple</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">digits</span><span class="p">(</span><span class="n">n</span><span class="p">))</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">digits</span><span class="p">(</span><span class="n">d</span><span class="p">)):</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">count</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">153</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="c">#ans= lame()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The number of fractions which contain a numerator&quot;</span>
+        <span class="s">&quot; with more digits than denominator:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Square root convergents</a><ul>
+<li><a class="reference internal" href="#bad-idea">Bad Idea</a></li>
+<li><a class="reference internal" href="#good-idea">Good Idea</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler56.html" title="previous chapter">Powerful digit sum</a></li>
+      <li>Next: <a href="euler58.html" title="next chapter">Spiral primes</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler57.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler57.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

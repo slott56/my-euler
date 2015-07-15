@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>10001st prime &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Largest product in a series" href="euler08.html" />
+    <link rel="prev" title="Sum square difference" href="euler06.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="st-prime">
+<h1>10001st prime<a class="headerlink" href="#st-prime" title="Permalink to this headline">¶</a></h1>
+<p>Problem 7</p>
+<p>By listing the first six prime numbers: 2, 3, 5, 7, 11, and 13,
+we can see that the 6th prime is 13.</p>
+<p>What is the 10001<sup>st</sup> prime number?</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler07"></span><p>An exception for composite numbers. We can raise this to break
+out of a loop.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Composite</span><span class="p">(</span> <span class="ne">Exception</span> <span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>Seive of Eratosthones requires allocating some array of numbers and discarding
+non-primes. How big should this array be? We could guess or experiment.</p>
+<p>Python&#8217;s list or set, however, allow us a flexible structure that allows us to
+use a growing set of primes.</p>
+<dl class="function">
+<dt id="euler07.primeGen">
+<code class="descclassname">euler07.</code><code class="descname">primeGen</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#euler07.primeGen" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">Iterator which emits prime numbers.</code></dt>
+<dd></dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">primeGen</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Generate prime numbers indefinitely.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler07 import primeGen</span>
+<span class="sd">    &gt;&gt;&gt; g= primeGen()</span>
+<span class="sd">    &gt;&gt;&gt; [ next(g) for _ in range(6) ]</span>
+<span class="sd">    [2, 3, 5, 7, 11, 13]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">yield</span> <span class="mi">2</span>
+    <span class="n">primes</span><span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="c"># or set([2])</span>
+    <span class="n">n</span><span class="o">=</span> <span class="mi">3</span>
+    <span class="n">limit</span><span class="o">=</span> <span class="mi">2</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">primes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">v</span> <span class="o">&gt;</span> <span class="n">limit</span><span class="p">:</span> <span class="k">break</span>
+                <span class="k">if</span> <span class="n">n</span><span class="o">%</span><span class="n">v</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">Composite</span>
+            <span class="n">primes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="c"># or primes.add(n)</span>
+            <span class="k">yield</span> <span class="n">n</span>
+        <span class="k">except</span> <span class="n">Composite</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="n">n</span><span class="o">=</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">2</span>
+        <span class="k">while</span> <span class="n">limit</span><span class="o">*</span><span class="n">limit</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
+            <span class="n">limit</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="euler07.makePrimes">
+<code class="descclassname">euler07.</code><code class="descname">makePrimes</code><span class="sig-paren">(</span><em>count</em><span class="sig-paren">)</span><a class="headerlink" href="#euler07.makePrimes" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">Generate a number of primes as a list object.</code></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>count</strong> &#8211; number of primes to create</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of primes of len(count)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">makePrimes</span><span class="p">(</span> <span class="n">count</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return count primes.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler07 import makePrimes</span>
+<span class="sd">    &gt;&gt;&gt; makePrimes(6)</span>
+<span class="sd">    [2, 3, 5, 7, 11, 13]</span>
+<span class="sd">    &gt;&gt;&gt; makePrimes(1000)[-1]</span>
+<span class="sd">    7919</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">g</span><span class="o">=</span> <span class="n">primeGen</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">next</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the requested answer: 10,001<sup>st</sup> prime.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">makePrimes</span><span class="p">(</span><span class="mi">10001</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">104743</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span> <span class="n">ans</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The 10001st prime number:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler06.html" title="previous chapter">Sum square difference</a></li>
+      <li>Next: <a href="euler08.html" title="next chapter">Largest product in a series</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler07.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler07.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Power digit sum &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Number letter counts" href="euler17.html" />
+    <link rel="prev" title="Lattice paths" href="euler15.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="power-digit-sum">
+<h1>Power digit sum<a class="headerlink" href="#power-digit-sum" title="Permalink to this headline">¶</a></h1>
+<p>Problem 16</p>
+<p><img class="math" src="_images/math/15c3f7d05a215dc70e1ede80183c68875c9bb3b3.png" alt="2^{15} = 32768"/> and the sum of its digits is 3 + 2 + 7 + 6 + 8 = 26.</p>
+<p>What is the sum of the digits of the number <img class="math" src="_images/math/2c9bc708d090918327fc3776e808a97762d3bc06.png" alt="2^{1000}"/>?</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler16"></span><dl class="function">
+<dt id="euler16.pow2_digits">
+<code class="descclassname">euler16.</code><code class="descname">pow2_digits</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#euler16.pow2_digits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute <img class="math" src="_images/math/e3eac54d53c30794ee37c4f02cf34a4901a8f0c4.png" alt="2^n"/> as a sequence of digits.
+Naive implementation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; power of 2</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">sequence of digits for 2**n</td>
+</tr>
+</tbody>
+</table>
+<p>This is, of course, horribly slow.</p>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">pow2_digits</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return digits from :math:`2^n`</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler16 import pow2_digits</span>
+<span class="sd">    &gt;&gt;&gt; pow2_digits(15)</span>
+<span class="sd">    [3, 2, 7, 6, 8]</span>
+<span class="sd">    &gt;&gt;&gt; sum(pow2_digits(15))</span>
+<span class="sd">    26</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">digits</span><span class="o">=</span> <span class="p">[</span> <span class="mi">1</span> <span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">carry</span><span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">digits</span><span class="p">):</span>
+            <span class="n">d2</span><span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">d</span><span class="o">+</span><span class="n">carry</span>
+            <span class="n">digits</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span> <span class="n">d2</span> <span class="o">%</span> <span class="mi">10</span>
+            <span class="n">carry</span> <span class="o">=</span> <span class="n">d2</span> <span class="o">//</span> <span class="mi">10</span>
+        <span class="k">if</span> <span class="n">carry</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">digits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">carry</span><span class="p">)</span>
+        <span class="c">#print( list(reversed(digits)) )</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">digits</span><span class="p">))</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="euler16.pow2_digits2">
+<code class="descclassname">euler16.</code><code class="descname">pow2_digits2</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#euler16.pow2_digits2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute <img class="math" src="_images/math/e3eac54d53c30794ee37c4f02cf34a4901a8f0c4.png" alt="2^n"/> as a sequence of digits.
+Using a fast exponentiation algorithm,
+we can reduce the number of multiplications from 1000 to
+<img class="math" src="_images/math/34dff46c08ad073822cf51af119455339c55d345.png" alt="\log_2 1000 \approx 11"/>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; power of 2</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">sequence of digits for 2**n</td>
+</tr>
+</tbody>
+</table>
+<p>This actually relies on Python&#8217;s internal long
+conversions in the internal val() function, so it
+uses long integer math and is not the same kind
+of digit-by-digit multiplication as <a class="reference internal" href="#euler16.pow2_digits" title="euler16.pow2_digits"><code class="xref py py-func docutils literal"><span class="pre">pow2_digits()</span></code></a>.</p>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">pow2_digits2</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return digits from :math:`2^n`</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler16 import pow2_digits2</span>
+<span class="sd">    &gt;&gt;&gt; pow2_digits2(15)</span>
+<span class="sd">    [3, 2, 7, 6, 8]</span>
+<span class="sd">    &gt;&gt;&gt; sum(pow2_digits2(15))</span>
+<span class="sd">    26</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">mul</span><span class="p">(</span> <span class="n">a</span><span class="p">,</span> <span class="n">b_int</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Implement a*b_int for digit sequence a and int b_int.</span>
+<span class="sd">        We really should use digit sequences for both a and b,</span>
+<span class="sd">        rather than assume b can be represented as a simple value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">digits</span><span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">))]</span>
+        <span class="n">carry</span><span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+            <span class="n">d2</span><span class="o">=</span> <span class="n">b_int</span><span class="o">*</span><span class="n">d</span><span class="o">+</span><span class="n">carry</span>
+            <span class="n">digits</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span> <span class="n">d2</span> <span class="o">%</span> <span class="mi">10</span>
+            <span class="n">carry</span> <span class="o">=</span> <span class="n">d2</span> <span class="o">//</span> <span class="mi">10</span>
+        <span class="k">while</span> <span class="n">carry</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">digits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">carry</span><span class="o">%</span><span class="mi">10</span><span class="p">)</span>
+            <span class="n">carry</span> <span class="o">//=</span> <span class="mi">10</span>
+        <span class="k">return</span> <span class="n">digits</span>
+    <span class="k">def</span> <span class="nf">fast_exp</span><span class="p">(</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute a**b using the fewest multiplies.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">b</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">mul</span><span class="p">(</span><span class="n">fast_exp</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">val</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">t</span><span class="o">=</span> <span class="n">fast_exp</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">mul</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">val</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">val</span><span class="p">(</span> <span class="n">digits</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Value of reversed sequence of digits.</span>
+<span class="sd">        This can (potentially) create long values.&quot;&quot;&quot;</span>
+        <span class="n">v</span><span class="o">=</span> <span class="mi">0</span>
+        <span class="n">p</span><span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">digits</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">+=</span> <span class="n">d</span><span class="o">*</span><span class="n">p</span>
+            <span class="n">p</span> <span class="o">*=</span> <span class="mi">10</span>
+        <span class="k">return</span> <span class="n">v</span>
+    <span class="n">digits</span><span class="o">=</span> <span class="n">fast_exp</span><span class="p">(</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">n</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">digits</span><span class="p">))</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="euler16.pow2_digits3">
+<code class="descclassname">euler16.</code><code class="descname">pow2_digits3</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#euler16.pow2_digits3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute <img class="math" src="_images/math/e3eac54d53c30794ee37c4f02cf34a4901a8f0c4.png" alt="2^n"/> as a sequence of digits.
+Use Python&#8217;s ordinary built-in 2**x.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; power of 2</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">sequence of digits for 2**n</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">euler04</span> <span class="kn">import</span> <span class="n">digits</span>
+<span class="k">def</span> <span class="nf">pow2_digits3</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return digits from :math:`2^n`</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler16 import pow2_digits3</span>
+<span class="sd">    &gt;&gt;&gt; pow2_digits3(15)</span>
+<span class="sd">    [3, 2, 7, 6, 8]</span>
+<span class="sd">    &gt;&gt;&gt; sum(pow2_digits3(15))</span>
+<span class="sd">    26</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">digits</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Test the module&#8217;s components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">pow2_digits2</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">1366</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compare performance of <a class="reference internal" href="#euler16.pow2_digits" title="euler16.pow2_digits"><code class="xref py py-func docutils literal"><span class="pre">pow2_digits()</span></code></a> and <a class="reference internal" href="#euler16.pow2_digits2" title="euler16.pow2_digits2"><code class="xref py py-func docutils literal"><span class="pre">pow2_digits2()</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">compare_timing</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">timeit</span>
+    <span class="n">p</span><span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span> <span class="s">&quot;pow2_digits(1000)&quot;</span><span class="p">,</span> <span class="s">&quot;from euler16 import pow2_digits&quot;</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="mi">100</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;pow2_digits&quot;</span><span class="p">,</span> <span class="n">p</span> <span class="p">)</span>
+    <span class="n">p2</span><span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span> <span class="s">&quot;pow2_digits2(1000)&quot;</span><span class="p">,</span> <span class="s">&quot;from euler16 import pow2_digits2&quot;</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="mi">100</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;pow2_digits2&quot;</span><span class="p">,</span> <span class="n">p2</span> <span class="p">)</span>
+    <span class="n">p3</span><span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span> <span class="s">&quot;pow2_digits3(1000)&quot;</span><span class="p">,</span> <span class="s">&quot;from euler16 import pow2_digits3&quot;</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="mi">100</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;pow2_digits3&quot;</span><span class="p">,</span> <span class="n">p3</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The sum of the digits of the number 2**1000:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+    <span class="c">#compare_timing()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler15.html" title="previous chapter">Lattice paths</a></li>
+      <li>Next: <a href="euler17.html" title="next chapter">Number letter counts</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler16.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler16.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

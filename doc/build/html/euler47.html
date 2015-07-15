@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Distinct primes factors &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Self powers" href="euler48.html" />
+    <link rel="prev" title="Goldbach’s other conjecture" href="euler46.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="distinct-primes-factors">
+<h1>Distinct primes factors<a class="headerlink" href="#distinct-primes-factors" title="Permalink to this headline">¶</a></h1>
+<p>Problem 47</p>
+<p>The first two consecutive numbers to have two distinct prime factors are:</p>
+<div class="math">
+<p><img src="_images/math/ddc97dd70eb805c27492ae1d9ef64c3012830cac.png" alt="14 = 2 \times 7
+\\
+15 = 3 \times 5"/></p>
+</div><p>The first three consecutive numbers to have three distinct prime factors are:</p>
+<div class="math">
+<p><img src="_images/math/e42bc8eb95d3cb82990fa508dffcf66ef32b66fa.png" alt="644 = 2^2 \times 7 \times 23
+\\
+645 = 3 \times 5 \times 43
+\\
+646 = 2 \times 17 \times 19"/></p>
+</div><p>Find the first four consecutive integers to have four distinct primes factors.
+What is the first of these numbers?</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler47"></span><p>Use the <a class="reference internal" href="euler05.html#euler05.primeFactors" title="euler05.primeFactors"><code class="xref py py-func docutils literal"><span class="pre">euler05.primeFactors()</span></code></a> function.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">euler05</span> <span class="kn">import</span> <span class="n">primeFactors</span>
+</pre></div>
+</div>
+<p>The distinct factors: a set built from the prime factor sequence.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">distinctFactors</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; from euler47 import distinctFactors</span>
+<span class="sd">    &gt;&gt;&gt; distinctFactors(14)</span>
+<span class="sd">    {2, 7}</span>
+<span class="sd">    &gt;&gt;&gt; distinctFactors(15)</span>
+<span class="sd">    {3, 5}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span> <span class="n">primeFactors</span><span class="p">(</span> <span class="n">n</span> <span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Check for consecutive primes with a given number of distinct
+factors.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">consecutive</span><span class="p">(</span> <span class="n">n</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">distinct</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; from euler47 import consecutive</span>
+<span class="sd">    &gt;&gt;&gt; consecutive( 14, 2, 2 )</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; consecutive( 644, 3, 3 )</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span> <span class="n">distinct</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">map</span><span class="p">(</span> <span class="n">distinctFactors</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">n</span><span class="o">+</span><span class="n">steps</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">n</span><span class="o">=</span> <span class="mi">2</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">consecutive</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">n</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">134043</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The least of the first four consecutive integers to have four distinct primes factors:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler46.html" title="previous chapter">Goldbach&#8217;s other conjecture</a></li>
+      <li>Next: <a href="euler48.html" title="next chapter">Self powers</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler47.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler47.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

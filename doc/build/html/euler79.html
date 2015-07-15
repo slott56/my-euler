@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Passcode derivation &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Path sum: two ways" href="euler81.html" />
+    <link rel="prev" title="Counting summations" href="euler76.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="passcode-derivation">
+<h1>Passcode derivation<a class="headerlink" href="#passcode-derivation" title="Permalink to this headline">¶</a></h1>
+<p>Problem 79</p>
+<p>A common security method used for online banking is to ask the user for three
+random characters from a passcode. For example, if the passcode was 531278, they
+may asked for the 2nd, 3rd, and 5th characters; the expected reply would be:
+317.</p>
+<p>The text file, <a class="reference external" href="http://projecteuler.net/project/keylog.txt">keylog.txt</a>, contains fifty successful login attempts.</p>
+<p>Given that the three characters are always asked for in order, analyse the file
+so as to determine the shortest possible secret passcode of unknown length.</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler79"></span><p>Essentially, this is a topological sort/merge.</p>
+<p>Each successful attempt gives us a partial ordering of digits.  When we
+merge all the partial orders, we get a total order.  We can then remove
+duplicates.</p>
+<p>Each new number can be merged into the total order or has to be deferred because
+we can&#8217;t match any digits with our total order.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">urllib.request</span>
+</pre></div>
+</div>
+<p>A class to define the ordering of a before b.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Before</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="o">=</span> <span class="n">a</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="o">=</span> <span class="n">b</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> &lt; </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="p">)</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">a</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">b</span>
+</pre></div>
+</div>
+<p>Create <code class="xref py py-class docutils literal"><span class="pre">Before</span></code> pairs from a list of the 3-character subsequences.
+Each a, b, c sequence is an a,b and b,c ordering.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">makePairs</span><span class="p">(</span> <span class="n">aList</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; sample= [ [2,4,6], [1,3,5], [1, 2, 3], [2, 3, 5], [3, 5, 4] ]</span>
+<span class="sd">    &gt;&gt;&gt; rules= makePairs( sample )</span>
+<span class="sd">    &gt;&gt;&gt; [ (k,rules[k]) for k in sorted(rules) ]</span>
+<span class="sd">    [(1, [1 &lt; 3, 1 &lt; 2]), (2, [2 &lt; 4, 2 &lt; 3]), (3, [3 &lt; 5]), (4, [4 &lt; 6]), (5, [5 &lt; 4])]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ruleDict</span><span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">subseq</span> <span class="ow">in</span> <span class="n">aList</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subseq</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">rule</span><span class="o">=</span> <span class="n">Before</span><span class="p">(</span> <span class="n">subseq</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">subseq</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="n">rule</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ruleDict</span><span class="p">[</span><span class="n">rule</span><span class="o">.</span><span class="n">a</span><span class="p">]:</span>
+                <span class="n">ruleDict</span><span class="p">[</span><span class="n">rule</span><span class="o">.</span><span class="n">a</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">rule</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">ruleDict</span>
+</pre></div>
+</div>
+<p>Topological sort among all <code class="xref py py-class docutils literal"><span class="pre">Before</span></code> orderings.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">topoSort</span><span class="p">(</span> <span class="n">ruleDict</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; sample= [ [2,4,6], [1,3,5], [1, 2, 3], [2, 3, 5], [3, 5, 4] ]</span>
+<span class="sd">    &gt;&gt;&gt; ruleDict= makePairs( sample )</span>
+<span class="sd">    &gt;&gt;&gt; list( topoSort(ruleDict) )</span>
+<span class="sd">    [1, 2, 3, 5, 4, 6]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">last</span><span class="o">=</span> <span class="bp">None</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">ruleDict</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">bValues</span><span class="o">=</span> <span class="p">[</span> <span class="n">r</span><span class="o">.</span><span class="n">b</span> <span class="k">for</span> <span class="n">rList</span> <span class="ow">in</span> <span class="n">ruleDict</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rList</span> <span class="p">]</span>
+        <span class="n">aValues</span><span class="o">=</span> <span class="p">[</span> <span class="n">r</span><span class="o">.</span><span class="n">a</span> <span class="k">for</span> <span class="n">rList</span> <span class="ow">in</span> <span class="n">ruleDict</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rList</span> <span class="p">]</span>
+        <span class="n">topSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span> <span class="n">aValues</span> <span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span> <span class="n">bValues</span> <span class="p">)</span>
+        <span class="n">last</span><span class="o">=</span> <span class="nb">set</span><span class="p">(</span> <span class="n">bValues</span> <span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span> <span class="n">aValues</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">topSet</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span> <span class="s">&quot;Unsortable&quot;</span> <span class="p">)</span>
+        <span class="n">top</span><span class="o">=</span> <span class="n">topSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">yield</span> <span class="n">top</span>
+        <span class="k">del</span> <span class="n">ruleDict</span><span class="p">[</span><span class="n">top</span><span class="p">]</span>
+    <span class="k">yield</span> <span class="n">last</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">sample</span><span class="o">=</span> <span class="p">[</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="p">]</span>
+    <span class="n">ruleDict</span><span class="o">=</span> <span class="n">makePairs</span><span class="p">(</span> <span class="n">sample</span> <span class="p">)</span>
+    <span class="c">#print ruleDict</span>
+    <span class="k">assert</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="nb">list</span><span class="p">(</span> <span class="n">topoSort</span><span class="p">(</span><span class="n">ruleDict</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="c"># &#39;http://projecteuler.net/project/keylog.txt&#39;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span> <span class="s">&quot;file:keylog.txt&quot;</span> <span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&quot;ASCII&quot;</span><span class="p">)</span>
+    <span class="n">ruleDict</span><span class="o">=</span> <span class="n">makePairs</span><span class="p">(</span> <span class="n">data</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="p">)</span>
+    <span class="c">#print ruleDict</span>
+    <span class="k">return</span> <span class="s">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span> <span class="n">topoSort</span><span class="p">(</span><span class="n">ruleDict</span><span class="p">))</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="s">&#39;73162890&#39;</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span><span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span> <span class="n">ans</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The shortest possible secret passcode of unknown length from the given file:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler76.html" title="previous chapter">Counting summations</a></li>
+      <li>Next: <a href="euler81.html" title="next chapter">Path sum: two ways</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler79.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler79.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

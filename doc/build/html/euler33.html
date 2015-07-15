@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Digit canceling fractions &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Digit factorials" href="euler34.html" />
+    <link rel="prev" title="Pandigital products" href="euler32.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="digit-canceling-fractions">
+<h1>Digit canceling fractions<a class="headerlink" href="#digit-canceling-fractions" title="Permalink to this headline">¶</a></h1>
+<p>Problem 33</p>
+<p>The fraction <img class="math" src="_images/math/0adc11e6466aea67f18347981709603f5e12904b.png" alt="\frac{49}{98}"/> is a curious fraction, as an inexperienced
+mathematician in attempting to simplify it may incorrectly believe that
+<img class="math" src="_images/math/052ee1fb67d7ec2cda492b3b3127b24ec6c320a6.png" alt="\frac{49}{98} = \frac{4}{8}"/>, which is correct, is obtained by cancelling the 9s.</p>
+<p>We shall consider fractions like, <img class="math" src="_images/math/957208748131fd171969ab6e529dc9bd89b7fff6.png" alt="\frac{30}{50} = \frac{3}{5}"/>, to be trivial examples.</p>
+<p>There are exactly four non-trivial examples of this type of fraction, less than
+one in value, and containing two digits in the numerator and denominator.</p>
+<p>If the product of these four fractions is given in its lowest common terms, find
+the value of the denominator.</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler33"></span><p>Use <a class="reference internal" href="euler04.html#euler04.digits" title="euler04.digits"><code class="xref py py-func docutils literal"><span class="pre">euler04.digits()</span></code></a> and  <a class="reference internal" href="euler05.html#euler05.prod" title="euler05.prod"><code class="xref py py-func docutils literal"><span class="pre">euler05.prod()</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">euler04</span> <span class="kn">import</span> <span class="n">digits</span>
+<span class="kn">from</span> <span class="nn">euler05</span> <span class="kn">import</span> <span class="n">prod</span>
+</pre></div>
+</div>
+<p>Greatest Common Divisor to locate way to properly reduce a fraction.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">gcd</span><span class="p">(</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Greatest ommon divisor between p and q.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler33 import gcd</span>
+<span class="sd">    &gt;&gt;&gt; gcd( 49, 98 )</span>
+<span class="sd">    49</span>
+<span class="sd">    &gt;&gt;&gt; gcd( 4, 8 )</span>
+<span class="sd">    4</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="n">q</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">p</span>
+    <span class="k">elif</span> <span class="n">p</span> <span class="o">&gt;</span> <span class="n">q</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">gcd</span><span class="p">(</span> <span class="n">p</span><span class="o">-</span><span class="n">q</span><span class="p">,</span> <span class="n">q</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">q</span> <span class="o">&gt;</span> <span class="n">p</span>
+        <span class="k">return</span> <span class="n">gcd</span><span class="p">(</span> <span class="n">q</span><span class="o">-</span><span class="n">p</span><span class="p">,</span> <span class="n">p</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Digit Cancellation of two sequences of digits. Locates one common digit
+and excises it, if possible.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">cancelDigits</span><span class="p">(</span> <span class="n">da</span><span class="p">,</span> <span class="n">db</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;For two sequences of digits, locate a common digit.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler33 import cancelDigits</span>
+<span class="sd">    &gt;&gt;&gt; cancelDigits( (4, 9), (9, 8) )</span>
+<span class="sd">    ((4,), (8,))</span>
+<span class="sd">    &gt;&gt;&gt; cancelDigits( digits(49), digits(98) )</span>
+<span class="sd">    ([4], [8])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">da</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">db</span><span class="p">:</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">da</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">da</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:],</span> <span class="n">db</span><span class="p">[:</span><span class="n">j</span><span class="p">]</span><span class="o">+</span><span class="n">db</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">da</span><span class="p">,</span> <span class="n">db</span>
+</pre></div>
+</div>
+<p>Compare digit cancellation with proper reduction for numbers in
+the given range: [11 to 99], inclusive</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">genUnorthodoxCancels</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Compare digit cancellation and proper fraction reduction.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler33 import genUnorthodoxCancels</span>
+<span class="sd">    &gt;&gt;&gt; list( genUnorthodoxCancels() )</span>
+<span class="sd">    [(16, 64), (26, 65), (19, 95), (49, 98)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span><span class="mi">100</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span><span class="n">d</span><span class="p">):</span>
+            <span class="n">dn</span><span class="p">,</span> <span class="n">dd</span> <span class="o">=</span> <span class="n">digits</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">digits</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">dn</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">dd</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="n">n2</span><span class="p">,</span> <span class="n">d2</span> <span class="o">=</span> <span class="n">cancelDigits</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span><span class="n">dd</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">dn</span> <span class="o">==</span> <span class="n">n2</span><span class="p">:</span> <span class="k">continue</span> <span class="c"># No improper digit cancellation</span>
+            <span class="n">r</span><span class="o">=</span> <span class="n">gcd</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+            <span class="n">r2</span><span class="o">=</span> <span class="n">gcd</span><span class="p">(</span><span class="n">n2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">d2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">n</span><span class="o">//</span><span class="n">r</span> <span class="o">==</span> <span class="n">n2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">//</span><span class="n">r2</span> <span class="ow">and</span> <span class="n">d</span><span class="o">//</span><span class="n">r</span> <span class="o">==</span> <span class="n">d2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">//</span><span class="n">r2</span><span class="p">:</span>
+                <span class="c">#print( n, d, n2, d2 )</span>
+                <span class="k">yield</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span>
+</pre></div>
+</div>
+<p>Test the components in this module.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">fn</span><span class="p">,</span> <span class="n">fd</span> <span class="ow">in</span> <span class="n">genUnorthodoxCancels</span><span class="p">():</span>
+        <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">n</span><span class="o">*</span><span class="n">fn</span><span class="p">,</span> <span class="n">d</span><span class="o">*</span><span class="n">fd</span>
+    <span class="n">r</span><span class="o">=</span> <span class="n">gcd</span><span class="p">(</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="p">)</span>
+    <span class="c">#print( n//r, d//r )</span>
+    <span class="k">return</span> <span class="n">d</span><span class="o">//</span><span class="n">r</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span> <span class="n">ans</span> <span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">100</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span> <span class="n">ans</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The denominator of the product of the four fractions that can be cancelled in an unorthodox way:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler32.html" title="previous chapter">Pandigital products</a></li>
+      <li>Next: <a href="euler34.html" title="next chapter">Digit factorials</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler33.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler33.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

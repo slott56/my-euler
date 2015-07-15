@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Prime permutations &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Consecutive prime sum" href="euler50.html" />
+    <link rel="prev" title="Self powers" href="euler48.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="prime-permutations">
+<h1>Prime permutations<a class="headerlink" href="#prime-permutations" title="Permalink to this headline">¶</a></h1>
+<p>Problem 49</p>
+<p>The arithmetic sequence, 1487, 4817, 8147, in which each of the terms increases
+by 3330, is unusual in two ways: (i) each of the three terms are prime, and,
+(ii) each of the 4-digit numbers are permutations of one another.</p>
+<p>There are no arithmetic sequences made up of three 1-, 2-, or 3-digit primes,
+exhibiting this property, but there is one other 4-digit increasing sequence.</p>
+<p>What 12-digit number do you form by concatenating the three terms in this sequence?</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler49"></span><p>We&#8217;ll make use of a number of functions:
+<a class="reference internal" href="euler07.html#euler07.primeGen" title="euler07.primeGen"><code class="xref py py-func docutils literal"><span class="pre">euler07.primeGen()</span></code></a>, <a class="reference internal" href="euler52.html#euler52.isPermutation" title="euler52.isPermutation"><code class="xref py py-func docutils literal"><span class="pre">euler52.isPermutation()</span></code></a>,
+<a class="reference internal" href="euler04.html#euler04.digits" title="euler04.digits"><code class="xref py py-func docutils literal"><span class="pre">euler04.digits()</span></code></a>, and <a class="reference internal" href="euler35.html#euler35.number" title="euler35.number"><code class="xref py py-func docutils literal"><span class="pre">euler35.number()</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">euler07</span> <span class="kn">import</span> <span class="n">primeGen</span>
+<span class="kn">from</span> <span class="nn">euler52</span> <span class="kn">import</span> <span class="n">isPermutation</span>
+<span class="kn">from</span> <span class="nn">euler04</span> <span class="kn">import</span> <span class="n">digits</span>
+<span class="kn">from</span> <span class="nn">euler35</span> <span class="kn">import</span> <span class="n">number</span>
+</pre></div>
+</div>
+<p>We can filter the results of <a class="reference internal" href="euler07.html#euler07.primeGen" title="euler07.primeGen"><code class="xref py py-func docutils literal"><span class="pre">euler07.primeGen()</span></code></a> to
+yield primes, p, such that 1000 ≤ p &lt; 10000. These are the
+4-digit primes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">makePrimes</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mi">10000</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Make primes in the given range.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler49 import makePrimes</span>
+<span class="sd">    &gt;&gt;&gt; p4 = list(makePrimes())</span>
+<span class="sd">    &gt;&gt;&gt; len(p4)</span>
+<span class="sd">    1061</span>
+<span class="sd">    &gt;&gt;&gt; p4 # doctest: +ELLIPSIS</span>
+<span class="sd">    [1009, ..., 9973]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pg</span><span class="o">=</span> <span class="n">primeGen</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pg</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="o">&gt;=</span> <span class="n">stop</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="o">&lt;=</span> <span class="n">p</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">p</span>
+</pre></div>
+</div>
+<p>For a set of primes, yield all of the larger primes so we
+can compute the various gaps available between this
+prime and all others.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">makeGaps</span><span class="p">(</span> <span class="n">primes</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Make all gaps between all primes.</span>
+<span class="sd">    &gt;&gt;&gt; from euler49 import makePrimes, makeGaps</span>
+<span class="sd">    &gt;&gt;&gt; p4 = list(makePrimes())</span>
+<span class="sd">    &gt;&gt;&gt; gaps= set( makeGaps(p4) )</span>
+<span class="sd">    &gt;&gt;&gt; len(gaps)</span>
+<span class="sd">    3977</span>
+<span class="sd">    &gt;&gt;&gt; min(gaps)</span>
+<span class="sd">    2</span>
+<span class="sd">    &gt;&gt;&gt; max(gaps)</span>
+<span class="sd">    7954</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">p_min</span><span class="p">,</span> <span class="n">p_max</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">primes</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">primes</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span> <span class="n">primes</span> <span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">primes</span><span class="p">)</span> <span class="p">):</span>
+            <span class="n">gap</span><span class="o">=</span> <span class="n">primes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="n">a</span>
+            <span class="k">if</span> <span class="n">gap</span><span class="o">+</span><span class="n">p_min</span><span class="o">+</span><span class="n">p_min</span> <span class="o">&gt;</span> <span class="n">p_max</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="k">yield</span> <span class="n">gap</span>
+</pre></div>
+</div>
+<p>Given primes and allowed gaps between primes,
+compute triples of prime, prime+gap and prime+gap+gap
+where all three values are prime.</p>
+<p>Note that this is <img class="math" src="_images/math/df51f310fe8c571ac83d0d237f62dcc5a0aa17f5.png" alt="\textbf{O}(n^3)"/> because we
+process the primes when creating the gaps and again
+here. If the gaps yielded prime,gap as a pair, we
+could eliminate the outer loop.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">threeStep</span><span class="p">(</span><span class="n">primes</span><span class="p">,</span> <span class="n">gaps</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    from euler49 import makePrimes, makeGaps, threeStep</span>
+<span class="sd">    &gt;&gt;&gt; p4 = list(makePrimes())</span>
+<span class="sd">    &gt;&gt;&gt; gaps= set( makeGaps(p4) )</span>
+<span class="sd">    &gt;&gt;&gt; step3= list( threeStep( p4, gaps ) )</span>
+<span class="sd">    &gt;&gt;&gt; len(step3)</span>
+<span class="sd">    42994</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pSet</span><span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">primes</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">primes</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">gaps</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">+</span><span class="n">g</span> <span class="ow">in</span> <span class="n">pSet</span> <span class="ow">and</span> <span class="n">p</span><span class="o">+</span><span class="n">g</span><span class="o">+</span><span class="n">g</span> <span class="ow">in</span> <span class="n">pSet</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">p</span><span class="p">,</span> <span class="n">p</span><span class="o">+</span><span class="n">g</span><span class="p">,</span> <span class="n">p</span><span class="o">+</span><span class="n">g</span><span class="o">+</span><span class="n">g</span>
+</pre></div>
+</div>
+<p>The answer involves 4-digit primes and gaps.
+Which set of numbers &#8211; with a consistent gap &#8211; are
+permutations of each other?</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">primeGapPerm</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;There are just two answers.</span>
+<span class="sd">    &gt;&gt;&gt; from euler49 import primeGapPerm</span>
+<span class="sd">    &gt;&gt;&gt; list(primeGapPerm())</span>
+<span class="sd">    [(1487, 4817, 8147), (2969, 6299, 9629)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">p4</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">makePrimes</span><span class="p">())</span>
+    <span class="n">gaps</span><span class="o">=</span> <span class="nb">set</span><span class="p">(</span> <span class="n">makeGaps</span><span class="p">(</span><span class="n">p4</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">step3</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span> <span class="n">threeStep</span><span class="p">(</span> <span class="n">p4</span><span class="p">,</span> <span class="n">gaps</span> <span class="p">)</span> <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">step3</span><span class="p">:</span>
+        <span class="n">da</span><span class="o">=</span> <span class="n">digits</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">db</span><span class="o">=</span> <span class="n">digits</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="n">dc</span><span class="o">=</span> <span class="n">digits</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">isPermutation</span><span class="p">(</span><span class="n">da</span><span class="p">,</span><span class="n">db</span><span class="p">)</span> <span class="ow">and</span> <span class="n">isPermutation</span><span class="p">(</span><span class="n">db</span><span class="p">,</span><span class="n">dc</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="n">primeGapPerm</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">1487</span> <span class="ow">and</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">4817</span> <span class="ow">and</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">8147</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">return</span> <span class="n">number</span><span class="p">(</span> <span class="n">digits</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">digits</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">+</span> <span class="n">digits</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span> <span class="n">ans</span> <span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">296962999629</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span> <span class="n">ans</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;Concatenating the three terms in this sequence of 4-digit primes that are permutations:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler48.html" title="previous chapter">Self powers</a></li>
+      <li>Next: <a href="euler50.html" title="next chapter">Consecutive prime sum</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler49.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler49.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

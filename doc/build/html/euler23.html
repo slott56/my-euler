@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Non-abundant sums &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Lexicographic permutations" href="euler24.html" />
+    <link rel="prev" title="Names scores" href="euler22.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="non-abundant-sums">
+<h1>Non-abundant sums<a class="headerlink" href="#non-abundant-sums" title="Permalink to this headline">¶</a></h1>
+<p>Problem 23</p>
+<p>A perfect number is a number for which the sum of its proper divisors is exactly
+equal to the number. For example, the sum of the proper divisors of 28 would be
+1 + 2 + 4 + 7 + 14 = 28, which means that 28 is a perfect number.</p>
+<p>A number whose proper divisors are less than the number is called deficient and
+a number whose proper divisors exceed the number is called abundant.</p>
+<p>As 12 is the smallest abundant number, 1 + 2 + 3 + 4 + 6 = 16, the smallest
+number that can be written as the sum of two abundant numbers is 24. By
+mathematical analysis, it can be shown that all integers greater than 28123 can
+be written as the sum of two abundant numbers. However, this upper limit cannot
+be reduced any further by analysis even though it is known that the greatest
+number that cannot be expressed as the sum of two abundant numbers is less than
+this limit.</p>
+<p>Find the sum of all the positive integers which cannot be written as the sum of
+two abundant numbers.</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler23"></span><p>Use <a class="reference internal" href="euler21.html#euler21.properDivisors" title="euler21.properDivisors"><code class="xref py py-func docutils literal"><span class="pre">euler21.properDivisors()</span></code></a> to compute the divisors.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">euler21</span> <span class="kn">import</span> <span class="n">properDivisors</span>
+</pre></div>
+</div>
+<p>Generate abundant numbers by filtering a larger set of numbers.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">abundant</span><span class="p">(</span> <span class="n">source</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Filter a source for abundant numbers.</span>
+<span class="sd">    &gt;&gt;&gt; from euler23 import abundant</span>
+<span class="sd">    &gt;&gt;&gt; list(abundant( (11, 12, 13) ))</span>
+<span class="sd">    [12]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">source</span> <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">properDivisors</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">i</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Alternative filter function to pass abundant numbers
+from a larger set of numbers.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">abundant2</span><span class="p">(</span> <span class="n">source</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Filter a source for abundant numbers.</span>
+<span class="sd">    &gt;&gt;&gt; from euler23 import abundant2</span>
+<span class="sd">    &gt;&gt;&gt; list(abundant2( (11, 12, 13) ))</span>
+<span class="sd">    [12]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">source</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">properDivisors</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">i</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">i</span>
+</pre></div>
+</div>
+<p>An generator which provides numbers which are not the sum of
+two abundant numbers.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">nonSum2Abundant</span><span class="p">(</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Yield a sequence of numbers that are **not** the sum of two abundant numbers&quot;&quot;&quot;</span>
+    <span class="n">A_s</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">abundant</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">28124</span><span class="p">))</span> <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">is_sum_2_abundant</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Is n the sum of 2 numbers in the A_s set?&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">A_s</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">n</span><span class="o">-</span><span class="n">a</span> <span class="ow">in</span> <span class="n">A_s</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">28124</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">is_sum_2_abundant</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">n</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    from euler21 import properDivisors</span>
+<span class="sd">    &gt;&gt;&gt; p28= properDivisors(28)</span>
+<span class="sd">    &gt;&gt;&gt; p28</span>
+<span class="sd">    [1, 2, 4, 7, 14]</span>
+<span class="sd">    &gt;&gt;&gt; sum(p28)</span>
+<span class="sd">    28</span>
+<span class="sd">    &gt;&gt;&gt; p12= properDivisors(12)</span>
+<span class="sd">    &gt;&gt;&gt; p12</span>
+<span class="sd">    [1, 2, 3, 4, 6]</span>
+<span class="sd">    &gt;&gt;&gt; sum(p12)</span>
+<span class="sd">    16</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">nonsum2</span> <span class="o">=</span> <span class="n">nonSum2Abundant</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">nonsum2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">4179871</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The sum of all the positive integers which cannot be written as the sum of&quot;</span>
+    <span class="s">&quot; two abundant numbers:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler22.html" title="previous chapter">Names scores</a></li>
+      <li>Next: <a href="euler24.html" title="next chapter">Lexicographic permutations</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler23.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler23.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

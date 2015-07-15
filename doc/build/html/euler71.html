@@ -1,0 +1,270 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Ordered fractions &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Counting summations" href="euler76.html" />
+    <link rel="prev" title="Totient maximum" href="euler69.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ordered-fractions">
+<h1>Ordered fractions<a class="headerlink" href="#ordered-fractions" title="Permalink to this headline">¶</a></h1>
+<p>Problem 71</p>
+<p>Consider the fraction, n/d, where n and d are positive integers.
+If n&lt;d and HCF(n,d)=1, it is called a reduced proper fraction.</p>
+<p>If we list the set of reduced proper fractions for d ≤ 8 in
+ascending order of size, we get:</p>
+<blockquote>
+<div>1/8, 1/7, 1/6, 1/5, 1/4, 2/7, 1/3, 3/8, 2/5, 3/7, 1/2, 4/7, 3/5, 5/8,
+2/3, 5/7, 3/4, 4/5, 5/6, 6/7, 7/8</div></blockquote>
+<p>It can be seen that 2/5 is the fraction immediately to the left of 3/7.</p>
+<p>By listing the set of reduced proper fractions for d ≤
+1,000,000 in ascending order of size, find the numerator of the fraction
+immediately to the left of 3/7.</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler71"></span><div class="section" id="bad-idea">
+<h2>Bad Idea<a class="headerlink" href="#bad-idea" title="Permalink to this headline">¶</a></h2>
+<p>Here are the raw numerators and denominators.
+However. This will generate and filter out endless unreduced duplicates.
+And for d of 1,000,000 this will enumerate 499,999,500,000 combinations.</p>
+<p>Further, we only want fractions up to 3/7; so we&#8217;re not really generating
+all combinations. But sill, half of 500 billion will take a while.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">fraction_iter</span><span class="p">(</span> <span class="n">stop</span><span class="o">=</span><span class="mi">9</span> <span class="p">):</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">stop</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">d</span><span class="p">):</span>
+            <span class="c"># n/d is the fraction.</span>
+            <span class="k">yield</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span>
+
+<span class="k">def</span> <span class="nf">gcd</span><span class="p">(</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Highest Common Factor.</span>
+<span class="sd">    &gt;&gt;&gt; gcd(2,8)</span>
+<span class="sd">    2</span>
+<span class="sd">    &gt;&gt;&gt; gcd(4,7)</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; gcd(1, 7)</span>
+<span class="sd">    1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">return</span> <span class="n">n</span>
+    <span class="k">return</span> <span class="n">gcd</span><span class="p">(</span> <span class="n">d</span><span class="p">,</span> <span class="n">n</span> <span class="o">%</span> <span class="n">d</span> <span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">fraction_sort</span><span class="p">(</span> <span class="n">fraction_iter</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; fs = fraction_sort( fraction_iter(9) )</span>
+<span class="sd">    &gt;&gt;&gt; [ &quot;{1}/{2}&quot;.format(*t) for t in fs ]</span>
+<span class="sd">    [&#39;1/8&#39;, &#39;1/7&#39;, &#39;1/6&#39;, &#39;1/5&#39;, &#39;1/4&#39;, &#39;2/7&#39;, &#39;1/3&#39;, &#39;3/8&#39;, &#39;2/5&#39;, &#39;3/7&#39;, &#39;1/2&#39;, &#39;4/7&#39;, &#39;3/5&#39;, &#39;5/8&#39;, &#39;2/3&#39;, &#39;5/7&#39;, &#39;3/4&#39;, &#39;4/5&#39;, &#39;5/6&#39;, &#39;6/7&#39;, &#39;7/8&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span> <span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="n">d</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">d</span> <span class="ow">in</span> <span class="n">fraction_iter</span> <span class="k">if</span> <span class="n">gcd</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">d</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">fraction_before</span><span class="p">(</span> <span class="n">fs</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">7</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;fs is sorted fractions, ideally ``fraction_sort(fraction_iter(x))``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">f</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">d</span> <span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="better-idea">
+<h2>Better Idea<a class="headerlink" href="#better-idea" title="Permalink to this headline">¶</a></h2>
+<p>How many ways can we generate 3/7 using values from 1 to 1,000,000?
+There are about 142857 variations of the form
+<img class="math" src="_images/math/fcddb373b89b6514c7f7d028f76329ed33fd042a.png" alt="\frac{3k}{7k}"/> for a value k such that <img class="math" src="_images/math/1c64d7604fd4f41ff940417f2b6cd3f38ba82676.png" alt="7k \leq 1000000"/>.</p>
+<p>The largest is <img class="math" src="_images/math/79d883c17b77c74caa80a4ec71ac49b2f67f2255.png" alt="\frac{3 \times 142857}{7 \times 142857} = \frac{428571}{999999}"/>.
+In principle, the adjacent value is <img class="math" src="_images/math/c21ddfefb70d778ff978eead77a2c064e6ddf427.png" alt="\frac{2 \times 142857}{5 \times 142857} = \frac{285714}{714285}"/>.</p>
+<p>For d ≤ 8, there are 21 fractions from 1/8 to 7/8.
+Of the the 23 combinations of values, there are two sets of duplicates.</p>
+<p>We have factors 1, 2, 3, 5 and 7. Can we generate just the relevant
+21 combinations? Quickly?</p>
+<p>Expanding to d≤21, we have this pattern of adjacent numerators and denominators.</p>
+<blockquote>
+<div>&#8216;2/5&#8217;, &#8216;7/17&#8217;, &#8216;5/12&#8217;, &#8216;8/19&#8217;, &#8216;3/7&#8217;</div></blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">exploration1</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">d_max</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">38</span><span class="p">):</span>
+        <span class="n">fs</span><span class="o">=</span> <span class="n">fraction_sort</span><span class="p">(</span> <span class="n">fraction_iter</span><span class="p">(</span><span class="n">d_max</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">f</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">7</span> <span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="n">f_l</span><span class="p">,</span> <span class="n">n_l</span><span class="p">,</span> <span class="n">d_l</span> <span class="o">=</span> <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">common</span><span class="o">=</span> <span class="n">d</span><span class="o">*</span><span class="n">d_l</span>
+        <span class="n">P</span><span class="o">=</span> <span class="n">big_prime</span><span class="p">(</span><span class="n">d_max</span><span class="o">//</span><span class="mi">7</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span> <span class="s">&quot;≤&quot;</span><span class="p">,</span> <span class="n">d_max</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;P=&quot;</span><span class="p">,</span> <span class="n">P</span><span class="o">*</span><span class="mi">7</span><span class="p">,</span>
+              <span class="s">&quot;{0}/{1}={2}/{3}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_l</span><span class="p">,</span><span class="n">d_l</span><span class="p">,</span><span class="n">n_l</span><span class="o">*</span><span class="n">d</span><span class="p">,</span><span class="n">d_l</span><span class="o">*</span><span class="n">d</span><span class="p">),</span>
+              <span class="s">&quot;{0}/{1}={2}/{3}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">n</span><span class="o">*</span><span class="n">d_l</span><span class="p">,</span><span class="n">d</span><span class="o">*</span><span class="n">d_l</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Interestingly, the top 3/7 in this is (effectively) 57/133.
+19 is the largest prime ≤ 21.
+The value just below this, 56/133, reduces to 8/19.</p>
+<p>For really large values, the largest prime ≤ 1,000,000 is
+999,983.
+We can imagine, then, 3/7 becoming 3P/7P = 2999949/6999881.
+Counting down from there, we&#8217;re looking at fractions
+like 2999948/6999881 = 428564/999983.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">euler03</span> <span class="kn">import</span> <span class="n">isprime</span>
+<span class="k">def</span> <span class="nf">big_prime</span><span class="p">(</span> <span class="n">stop</span><span class="o">=</span><span class="mi">1000000</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Largest prime less than the given number or 1.&quot;&quot;&quot;</span>
+    <span class="k">while</span> <span class="n">stop</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isprime</span><span class="p">(</span><span class="n">stop</span><span class="p">):</span>
+        <span class="n">stop</span><span class="o">=</span> <span class="n">stop</span><span class="o">-</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">stop</span>
+
+<span class="k">def</span> <span class="nf">left_fraction</span><span class="p">(</span> <span class="n">d_max</span><span class="o">=</span> <span class="mi">8</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; left_fraction(8)</span>
+<span class="sd">    (2, 5)</span>
+<span class="sd">    &gt;&gt;&gt; left_fraction(22)</span>
+<span class="sd">    (8, 19)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">P</span><span class="o">=</span> <span class="n">big_prime</span><span class="p">(</span><span class="n">d_max</span><span class="o">//</span><span class="mi">7</span><span class="p">)</span>
+    <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">P</span><span class="p">,</span> <span class="mi">7</span><span class="o">*</span><span class="n">P</span>
+    <span class="n">choices</span><span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d_max</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="c"># Comparing 3/7 *12 = 36/84 to 35/84=5/12*7</span>
+        <span class="n">n_l</span><span class="p">,</span> <span class="n">d_l</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">p</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="o">*</span><span class="n">p</span>
+        <span class="k">if</span> <span class="n">n_l</span><span class="o">/</span><span class="n">d_l</span> <span class="o">&gt;</span> <span class="n">n</span><span class="o">/</span><span class="n">d</span><span class="p">:</span> <span class="k">continue</span>
+        <span class="n">g</span><span class="o">=</span> <span class="n">gcd</span><span class="p">(</span> <span class="n">n_l</span><span class="p">,</span> <span class="n">d_l</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">g</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">continue</span>
+        <span class="n">choices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">n_l</span><span class="o">/</span><span class="n">d_l</span><span class="p">,</span> <span class="n">n_l</span><span class="o">//</span><span class="n">g</span><span class="p">,</span> <span class="n">d_l</span><span class="o">//</span><span class="n">g</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">choices</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">n</span><span class="p">,</span><span class="n">d</span>
+
+<span class="k">def</span> <span class="nf">exploration2</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compare brute-force sorted fractions</span>
+<span class="sd">    with more subtle left-fraction count-down.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;d_max, d, n/d*7, n_l/d_l*7&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">101</span><span class="p">):</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">fraction_before</span><span class="p">(</span><span class="n">fraction_sort</span><span class="p">(</span><span class="n">fraction_iter</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
+        <span class="n">n_l</span><span class="p">,</span> <span class="n">d_l</span> <span class="o">=</span> <span class="n">left_fraction</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="n">n_l</span><span class="p">,</span> <span class="n">d_l</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="mi">7</span><span class="p">,</span><span class="n">d</span><span class="o">*</span><span class="mi">7</span><span class="p">),</span> <span class="p">(</span><span class="n">n_l</span><span class="o">*</span><span class="mi">7</span><span class="p">,</span><span class="n">d_l</span><span class="o">*</span><span class="mi">7</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="standard-elements">
+<h2>Standard Elements<a class="headerlink" href="#standard-elements" title="Permalink to this headline">¶</a></h2>
+<p>Test the components in the module.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">n_l</span><span class="p">,</span> <span class="n">d_l</span> <span class="o">=</span> <span class="n">left_fraction</span><span class="p">(</span> <span class="mi">1000000</span> <span class="p">)</span>
+    <span class="c">#print( n_l, d_l )</span>
+    <span class="k">return</span> <span class="n">n_l</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">428570</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="c">#exploration1()</span>
+    <span class="c">#exploration2()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span> <span class="n">ans</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The numerator of the fraction just before 3/7:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Ordered fractions</a><ul>
+<li><a class="reference internal" href="#bad-idea">Bad Idea</a></li>
+<li><a class="reference internal" href="#better-idea">Better Idea</a></li>
+<li><a class="reference internal" href="#standard-elements">Standard Elements</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler69.html" title="previous chapter">Totient maximum</a></li>
+      <li>Next: <a href="euler76.html" title="next chapter">Counting summations</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler71.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler71.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

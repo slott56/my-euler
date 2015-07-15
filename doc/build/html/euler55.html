@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Lychrel numbers &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Powerful digit sum" href="euler56.html" />
+    <link rel="prev" title="Poker hands" href="euler54.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="lychrel-numbers">
+<h1>Lychrel numbers<a class="headerlink" href="#lychrel-numbers" title="Permalink to this headline">¶</a></h1>
+<p>Problem 55</p>
+<p>If we take 47, reverse and add, 47 + 74 = 121, which is palindromic.</p>
+<p>Not all numbers produce palindromes so quickly. For example,</p>
+<blockquote>
+<div><p>349 + 943 = 1292,</p>
+<p>1292 + 2921 = 4213</p>
+<p>4213 + 3124 = 7337</p>
+</div></blockquote>
+<p>That is, 349 took three iterations to arrive at a palindrome.</p>
+<p>Although no one has proved it yet, it is thought that some numbers, like 196,
+never produce a palindrome. A number that never forms a palindrome through the
+reverse and add process is called a Lychrel number. Due to the theoretical
+nature of these numbers, and for the purpose of this problem, we shall assume
+that a number is Lychrel until proven otherwise. In addition you are given that
+for every number below ten-thousand, it will either (i) become a palindrome in
+less than fifty iterations, or, (ii) no one, with all the computing power that
+exists, has managed so far to map it to a palindrome. In fact, 10677 is the
+first number to be shown to require over fifty iterations before producing a
+palindrome: 4668731596684224866951378664 (53 iterations, 28-digits).</p>
+<p>Surprisingly, there are palindromic numbers that are themselves Lychrel numbers;
+the first example is 4994.</p>
+<p>How many Lychrel numbers are there below ten-thousand?</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler55"></span><p>Some handy functions we might need: <a class="reference internal" href="euler04.html#euler04.palindrome" title="euler04.palindrome"><code class="xref py py-func docutils literal"><span class="pre">euler04.palindrome()</span></code></a>,
+<a class="reference internal" href="euler04.html#euler04.digits" title="euler04.digits"><code class="xref py py-func docutils literal"><span class="pre">euler04.digits()</span></code></a>, and <a class="reference internal" href="euler35.html#euler35.number" title="euler35.number"><code class="xref py py-func docutils literal"><span class="pre">euler35.number()</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">euler04</span> <span class="kn">import</span> <span class="n">palindrome</span><span class="p">,</span> <span class="n">digits</span>
+<span class="kn">from</span> <span class="nn">euler35</span> <span class="kn">import</span> <span class="n">number</span>
+</pre></div>
+</div>
+<p>Reverse the digits and add to the original number.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">reverseAndAdd</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; from euler55 import reverseAndAdd</span>
+<span class="sd">    &gt;&gt;&gt; from euler04 import palindrome</span>
+<span class="sd">    &gt;&gt;&gt; reverseAndAdd(47)</span>
+<span class="sd">    121</span>
+<span class="sd">    &gt;&gt;&gt; palindrome( reverseAndAdd(47) )</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; reverseAndAdd( reverseAndAdd( reverseAndAdd( 349 ) ) )</span>
+<span class="sd">    7337</span>
+<span class="sd">    &gt;&gt;&gt; palindrome( reverseAndAdd( reverseAndAdd( reverseAndAdd( 349 ) ) ) )</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">digits</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">n</span> <span class="o">+</span> <span class="n">number</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Lychrel number within a given number of steps?</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">lychrel</span><span class="p">(</span> <span class="n">n</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">50</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; from euler55 import lychrel</span>
+<span class="sd">    &gt;&gt;&gt; lychrel(10677)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; lychrel(10677,limit=53)</span>
+<span class="sd">    False</span>
+<span class="sd">    &gt;&gt;&gt; lychrel(4994)</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span><span class="o">=</span> <span class="n">reverseAndAdd</span><span class="p">(</span> <span class="n">n</span> <span class="p">)</span>
+    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">limit</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">palindrome</span><span class="p">(</span><span class="n">n</span><span class="p">):</span> <span class="k">return</span> <span class="bp">False</span>
+        <span class="n">n</span><span class="o">=</span> <span class="n">reverseAndAdd</span><span class="p">(</span> <span class="n">n</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>Generate Lychrel numbers up to 10,000</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">lychrel_gen</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">lychrel</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">i</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">lychrel</span><span class="p">(</span><span class="mi">10677</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">lychrel</span><span class="p">(</span><span class="mi">10677</span><span class="p">,</span><span class="n">limit</span><span class="o">=</span><span class="mi">53</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">lychrel</span><span class="p">(</span><span class="mi">4994</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span> <span class="n">lychrel_gen</span><span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Confirm the answer</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">249</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The number of Lychrel numbers are there below ten-thousand:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler54.html" title="previous chapter">Poker hands</a></li>
+      <li>Next: <a href="euler56.html" title="next chapter">Powerful digit sum</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler55.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler55.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

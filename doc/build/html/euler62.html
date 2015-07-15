@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Cubic permutations &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Powerful digit counts" href="euler63.html" />
+    <link rel="prev" title="XOR decryption" href="euler59.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="cubic-permutations">
+<h1>Cubic permutations<a class="headerlink" href="#cubic-permutations" title="Permalink to this headline">¶</a></h1>
+<p>Problem 62</p>
+<p>The cube, 41063625 (<img class="math" src="_images/math/6ef23542cbf955a35a35d9fde0b19f452079dbe0.png" alt="345^3"/>), can be permuted to produce two other cubes:
+56623104 (<img class="math" src="_images/math/21b1f07a2ce67bcf62b99f61b7f689985b77d044.png" alt="384^3"/>) and 66430125 (<img class="math" src="_images/math/268d6bdfcef682017c9d84fca4c4e9087f5238cb.png" alt="405^3"/>). In fact, 41063625 is the smallest
+cube which has exactly three permutations of its digits which are also cube.</p>
+<p>Find the smallest cube for which exactly five permutations of its digits are cube.</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler62"></span><p>Choice 1: Generate many cubes and check for permutation?
+May require saving LOTS of cubes. millions?
+Quick permitation test is split digits and check for same set.</p>
+<p>Choice 2: Generate a cube and examine all permutations to see which
+variant is another cube. Don&#8217;t have to save anything.
+(This is too slow.)</p>
+<dl class="function">
+<dt id="euler62.digits">
+<code class="descclassname">euler62.</code><code class="descname">digits</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#euler62.digits" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">An iterator over the digits in a number.</code></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; A number</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">iterator over the digits</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">digits</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; list( digits( 41063625 ))</span>
+<span class="sd">    [5, 2, 6, 3, 6, 0, 1, 4]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">while</span> <span class="n">n</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">10</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p>Collapse a sequence of digits to a number.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">number</span><span class="p">(</span><span class="n">d_list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; number( reversed( [5, 2, 6, 3, 6, 0, 1, 4] ) )</span>
+<span class="sd">    41063625</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span><span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">d_list</span><span class="p">:</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">n</span><span class="o">*</span><span class="mi">10</span> <span class="o">+</span> <span class="n">d</span>
+    <span class="k">return</span> <span class="n">n</span>
+</pre></div>
+</div>
+<p>Faster.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">make_cubes</span><span class="p">(</span><span class="n">permutations</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">1000000</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; make_cubes(3)</span>
+<span class="sd">    [41063625, 56623104, 66430125]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cubes</span><span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">limit</span><span class="p">):</span>
+        <span class="n">number</span> <span class="o">=</span> <span class="n">i</span><span class="o">**</span><span class="mi">3</span>
+        <span class="n">d_counter</span><span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">digits</span><span class="p">(</span><span class="n">number</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">d_counter</span> <span class="ow">in</span> <span class="n">cubes</span><span class="p">:</span>
+            <span class="n">cubes</span><span class="p">[</span><span class="n">d_counter</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">i</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cubes</span><span class="p">[</span><span class="n">d_counter</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="n">permutations</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="n">c</span><span class="o">**</span><span class="mi">3</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cubes</span><span class="p">[</span><span class="n">d_counter</span><span class="p">]]</span>
+                <span class="c">#return min( c**3 for c in cubes[d_counter] )</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cubes</span><span class="p">[</span><span class="n">d_counter</span><span class="p">]</span><span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Too slow.</p>
+<p>May benefit from memoizing all integer cubes to save
+computing cube root of each permutation.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">permutations</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">exp</span><span class="p">,</span> <span class="n">log</span>
+<span class="k">def</span> <span class="nf">make_permutations</span><span class="p">(</span><span class="n">permute_count</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">limit</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">i</span><span class="o">**</span><span class="mi">3</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">digits</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">permutations</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+            <span class="n">r_3</span><span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="n">number</span><span class="p">(</span><span class="n">p</span><span class="p">))</span><span class="o">/</span><span class="mi">3</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">r_3</span><span class="o">**</span><span class="mi">3</span> <span class="o">==</span> <span class="n">number</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="ow">and</span> <span class="n">r_3</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">:</span>
+                <span class="n">matches</span><span class="o">.</span><span class="n">add</span><span class="p">(</span> <span class="n">r_3</span> <span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">permute_count</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">matches</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="nb">min</span><span class="p">(</span> <span class="n">make_cubes</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">ans</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">127035954683</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The smallest cube for which exactly five permutations of its digits are cube:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler59.html" title="previous chapter">XOR decryption</a></li>
+      <li>Next: <a href="euler63.html" title="next chapter">Powerful digit counts</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler62.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler62.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

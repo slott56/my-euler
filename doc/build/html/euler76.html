@@ -1,0 +1,396 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Counting summations &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Passcode derivation" href="euler79.html" />
+    <link rel="prev" title="Ordered fractions" href="euler71.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="counting-summations">
+<h1>Counting summations<a class="headerlink" href="#counting-summations" title="Permalink to this headline">¶</a></h1>
+<p>Problem 76</p>
+<p>It is possible to write five as a sum in exactly six different ways:</p>
+<ul class="simple">
+<li>4 + 1</li>
+<li>3 + 2</li>
+<li>3 + 1 + 1</li>
+<li>2 + 2 + 1</li>
+<li>2 + 1 + 1 + 1</li>
+<li>1 + 1 + 1 + 1 + 1</li>
+</ul>
+<p>How many different ways can one hundred be written as a sum of at least two positive integers?</p>
+<p>Bad Idea: Enumerate the tree of alternative sums.
+The issue is that 100 has 633825300114114700748351602687 combinations of
+values, which reduces to smaller number of distinct values. This is <img class="math" src="_images/math/4268a5d69ebcda355299cf5282d4795bb009c8ce.png" alt="10^{30}"/>.
+It&#8217;s not sensible to build the tree.</p>
+<p>Period.</p>
+</div>
+<div class="section" id="explorations">
+<h1>Explorations<a class="headerlink" href="#explorations" title="Permalink to this headline">¶</a></h1>
+<p>This simplistic version doesn&#8217;t scale well. But it lets us explore
+the space of combinations of sums for a given total.</p>
+<p>Enumerate all sums for a given number, n.
+This uses explicit sorting to make it easier to remove duplicates.
+That makes it <strong>very</strong> slow.</p>
+<p>Also, these generators include an extra singleton sum, (n,), which must be discarded.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">sums_to_n_iter1</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">head</span><span class="o">=</span><span class="p">()):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raw list with duplicates, sorted into canonical order to support later removal of duplicates.</span>
+
+<span class="sd">    &gt;&gt;&gt; list(sums_to_n_iter1(5))</span>
+<span class="sd">    [(5,), (1, 4), (1, 1, 3), (1, 1, 1, 2), (1, 1, 1, 1, 1), (1, 1, 1, 2), (1, 2, 2), (1, 1, 1, 2), (1, 1, 3), (2, 3), (1, 2, 2), (1, 1, 1, 2), (1, 2, 2), (2, 3), (1, 1, 3), (1, 4)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">yield</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">head</span><span class="o">+</span><span class="p">(</span><span class="n">n</span><span class="p">,)))</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="k">yield from</span> <span class="n">sums_to_n_iter1</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="n">v</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">head</span><span class="o">+</span><span class="p">(</span><span class="n">v</span><span class="p">,))))</span>
+</pre></div>
+</div>
+<p>This is unsorted. It&#8217;s much harder to remove duplicates.
+We have to wrap this with another function that sorts and removes duplicates.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">sums_to_n_iter2_raw</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">head</span><span class="o">=</span><span class="p">()):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raw list with duplicates, not sorted.</span>
+
+<span class="sd">    &gt;&gt;&gt; list(sums_to_n_iter2_raw(5))</span>
+<span class="sd">    [(5,), (1, 4), (1, 1, 3), (1, 1, 1, 2), (1, 1, 1, 1, 1), (1, 1, 2, 1), (1, 2, 2), (1, 2, 1, 1), (1, 3, 1), (2, 3), (2, 1, 2), (2, 1, 1, 1), (2, 2, 1), (3, 2), (3, 1, 1), (4, 1)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">yield</span> <span class="n">head</span><span class="o">+</span><span class="p">(</span><span class="n">n</span><span class="p">,)</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="k">yield from</span> <span class="n">sums_to_n_iter2_raw</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="n">v</span><span class="p">,</span> <span class="n">head</span><span class="o">+</span><span class="p">(</span><span class="n">v</span><span class="p">,))</span>
+
+<span class="k">def</span> <span class="nf">sums_to_n_iter2</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raw list with duplicates, properly sorted.</span>
+
+<span class="sd">    &gt;&gt;&gt; list(sums_to_n_iter2(5))</span>
+<span class="sd">    [(5,), (4, 1), (3, 1, 1), (2, 1, 1, 1), (1, 1, 1, 1, 1), (2, 1, 1, 1), (2, 2, 1), (2, 1, 1, 1), (3, 1, 1), (3, 2), (2, 2, 1), (2, 1, 1, 1), (2, 2, 1), (3, 2), (3, 1, 1), (4, 1)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span> <span class="k">for</span> <span class="n">raw</span> <span class="ow">in</span> <span class="n">sums_to_n_iter2_raw</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p>This is properly sorted without generating duplicates.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">sums_to_n_iter3</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">head</span><span class="o">=</span><span class="p">()):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raw list sorted in a canonical order.</span>
+
+<span class="sd">    &gt;&gt;&gt; list(sums_to_n_iter3(5))</span>
+<span class="sd">    [(5,), (1, 1, 1, 1, 1), (2, 1, 1, 1), (2, 2, 1), (3, 2), (3, 1, 1), (4, 1)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">head</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="n">head</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">head</span><span class="o">+</span><span class="p">(</span><span class="n">n</span><span class="p">,)</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">head</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">&gt;</span> <span class="n">head</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span> <span class="k">break</span>
+        <span class="k">yield from</span> <span class="n">sums_to_n_iter3</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="n">v</span><span class="p">,</span> <span class="n">head</span><span class="o">+</span><span class="p">(</span><span class="n">v</span><span class="p">,))</span>
+</pre></div>
+</div>
+<p>Create the minimized set of sums with more than two items.
+The singleton we need to discard is always first, so, we don&#8217;t
+really need to build a set object.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">canonical_sums1</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">sums_to_n_iter3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; cs1= canonical_sums1(5)</span>
+<span class="sd">    &gt;&gt;&gt; len(cs1)</span>
+<span class="sd">    6</span>
+<span class="sd">    &gt;&gt;&gt; sorted(cs1, reverse=True)</span>
+<span class="sd">    [(4, 1), (3, 2), (3, 1, 1), (2, 2, 1), (2, 1, 1, 1), (1, 1, 1, 1, 1)]</span>
+
+<span class="sd">    &gt;&gt;&gt; cs2= canonical_sums1(5, generator=sums_to_n_iter2)</span>
+<span class="sd">    &gt;&gt;&gt; len(cs2)</span>
+<span class="sd">    6</span>
+<span class="sd">    &gt;&gt;&gt; sorted(cs2, reverse=True)</span>
+<span class="sd">    [(4, 1), (3, 2), (3, 1, 1), (2, 2, 1), (2, 1, 1, 1), (1, 1, 1, 1, 1)]</span>
+
+<span class="sd">    &gt;&gt;&gt; cs3= canonical_sums1(5, generator=sums_to_n_iter3)</span>
+<span class="sd">    &gt;&gt;&gt; len(cs3)</span>
+<span class="sd">    6</span>
+<span class="sd">    &gt;&gt;&gt; sorted(cs3, reverse=True)</span>
+<span class="sd">    [(4, 1), (3, 2), (3, 1, 1), (2, 2, 1), (2, 1, 1, 1), (1, 1, 1, 1, 1)]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sums</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">generator</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sums</span>
+</pre></div>
+</div>
+<p>Performance question.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">performance</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">timeit</span>
+    <span class="n">t11</span><span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span><span class="s">&#39;canonical_sums1(5, generator=sums_to_n_iter1)&#39;</span><span class="p">,</span> <span class="s">&#39;from euler76 import canonical_sums1, sums_to_n_iter1&#39;</span><span class="p">)</span>
+    <span class="n">t12</span><span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span><span class="s">&#39;canonical_sums1(5, generator=sums_to_n_iter2)&#39;</span><span class="p">,</span> <span class="s">&#39;from euler76 import canonical_sums1, sums_to_n_iter2&#39;</span><span class="p">)</span>
+    <span class="n">t13</span><span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span><span class="s">&#39;canonical_sums1(5, generator=sums_to_n_iter3)&#39;</span><span class="p">,</span> <span class="s">&#39;from euler76 import canonical_sums1, sums_to_n_iter3&#39;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&#39;t11 = {t11}, t12 = {t12}, t13 = {t13}&#39;</span><span class="o">.</span><span class="n">format_map</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="analysis">
+<h1>Analysis<a class="headerlink" href="#analysis" title="Permalink to this headline">¶</a></h1>
+<p>Clearly, we can&#8217;t enumerate all <img class="math" src="_images/math/4268a5d69ebcda355299cf5282d4795bb009c8ce.png" alt="10^{30}"/> possible sums to
+remove duplicates and determine the final count of unique summations.</p>
+<p>The structure of the function gives us a hint as to how to proceed
+in locating the appropriate counts without actually enumerating all the items.</p>
+<p>Sums which add to 5, given by <img class="math" src="_images/math/0ce46235b69e27cd18fb13616049c082230b1ad3.png" alt="S(5)"/>.</p>
+<ul class="simple">
+<li>{(5,)} [<em>Yes, we&#8217;re aware this is discarded later.</em>]</li>
+<li>{(1,)+x for all x in S(4)}, S(4) = {(4,), (1,)+S(3), (2,)+S(1)}</li>
+<li>{(2,)+x for all x in S(3)}, S(3) = {(3,), (1,)+S(2)}</li>
+<li>{(3,)+x for all x in S(2)}, S(2) = {(2,), (1,)+S(1))},
+which is redundant with values above.</li>
+<li>{(4,)+x for all x in S(1)}, S(1) = {(1,)}</li>
+</ul>
+<p>The above is still pretty complex because we&#8217;re trying to remove duplicates
+early. The simplistic recursive definition doesn&#8217;t (easily) reveal
+duplicates. If it did, we&#8217;d see a simple Fibonacci-style relationship
+among the number of ways to create sums. We don&#8217;t see that when we look
+at the 14 ways to create a sum that adds to 7.</p>
+<p>How quickly does the number of summations grow?</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">explore1</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For small sets, how does the proper number of sums grow when</span>
+<span class="sd">    compared with the number of all possible sums?</span>
+
+<span class="sd">    This is the count of partitions vs. compositions of a number.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;:header: n, summations, non-unique&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">21</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">canonical_sums1</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&quot;,&quot;</span><span class="p">)</span>
+
+<span class="n">explore1</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Here&#8217;s the growth:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">n</th>
+<th class="head">partitions</th>
+<th class="head">compositions</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>2</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td>3</td>
+<td>2</td>
+<td>3</td>
+</tr>
+<tr class="row-even"><td>4</td>
+<td>4</td>
+<td>7</td>
+</tr>
+<tr class="row-odd"><td>5</td>
+<td>6</td>
+<td>15</td>
+</tr>
+<tr class="row-even"><td>6</td>
+<td>10</td>
+<td>31</td>
+</tr>
+<tr class="row-odd"><td>7</td>
+<td>14</td>
+<td>63</td>
+</tr>
+<tr class="row-even"><td>8</td>
+<td>21</td>
+<td>127</td>
+</tr>
+<tr class="row-odd"><td>9</td>
+<td>29</td>
+<td>255</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="another-analysis">
+<h1>Another Analysis<a class="headerlink" href="#another-analysis" title="Permalink to this headline">¶</a></h1>
+<p>Another Point of view is a 9-column table with the following headings.</p>
+<blockquote>
+<div>(1,), (1,1), (1,1,1), (1,1,1,1), (1,1,1,1,1), (2,), (2,2), (3,), (4,)</div></blockquote>
+<p>This allows us to ignorantly create all <img class="math" src="_images/math/fc9f475fe1f33160a1f174f8a7da58a665ef6347.png" alt="2^9"/> combinations. Of these
+<img class="math" src="_images/math/b1b9a72a3154afe060343f92de6dad16b11e07c7.png" alt="2^4"/> will sum to 5. Of these, 6 will be unique irrespective of ordering.</p>
+<p>There are <img class="math" src="_images/math/413f8a8e40062a9090d9d50b88bc7b551b314c26.png" alt="n"/> combinations of 1&#8217;s, <img class="math" src="_images/math/23ad1ff1e048bf9b9ff276913506d8e5c77de0b9.png" alt="\dfrac{n}{2}"/> combinations of 2&#8217;s,
+<img class="math" src="_images/math/6117846a46fffba6964f2c2ce334724d63d57452.png" alt="\dfrac{n}{3}"/> combinations of 3&#8217;s, etc., down to 1 combinations of all
+values greater than <img class="math" src="_images/math/d81d409f4c1e7af3754c3f1baabd332ef54bfe9f.png" alt="n/2"/>.</p>
+<p>This is 481 columns.</p>
+<div class="math">
+<p><img src="_images/math/6b7b75ac173aaf10831ecf606fcba20b8983c69f.png" alt="481 = \sum_{1 \leq x &lt; 100} \begin{cases}
+\dfrac{100}{x}&amp; \text{if $100/x \geq 1$},\\
+1&amp; \text{if $100/x \leq 1$}.
+\end{cases}"/></p>
+</div><p>Clearly, ignorantly filling in a table of :math`2^{481}` rows is crazy.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cols</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span>
+    <span class="n">n</span><span class="o">//</span> <span class="n">x</span> <span class="k">if</span> <span class="n">n</span><span class="o">//</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="k">print</span><span class="p">(</span> <span class="s">&quot;Columns required for 100 numbers&quot;</span><span class="p">,</span> <span class="n">cols</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="partition-function">
+<h1>Partition Function<a class="headerlink" href="#partition-function" title="Permalink to this headline">¶</a></h1>
+<p>This is hard. Super hard. It requires some research into number theory.</p>
+<p>See <a class="reference external" href="https://en.wikipedia.org/wiki/Partition_(number_theory">https://en.wikipedia.org/wiki/Partition_(number_theory</a>)
+We&#8217;re computing the order of each partition of a given number.</p>
+<p>See <a class="reference external" href="https://oeis.org/A000041">https://oeis.org/A000041</a>.</p>
+<p>This is the algorithm from Peter Luschny in <a class="reference external" href="https://oeis.org/wiki/User:Peter_Luschny/OddsAndEnds#How_to_compute_the_number_of_partitions_of_1.2C000.2C000.3F">https://oeis.org/wiki/User:Peter_Luschny/OddsAndEnds#How_to_compute_the_number_of_partitions_of_1.2C000.2C000.3F</a>.</p>
+<p>This is acceptable for numbers up to 1,000.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+
+<span class="k">def</span> <span class="nf">CachedFunction</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">with_cache</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cache</span><span class="p">:</span>
+            <span class="n">cache</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cache</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">with_cache</span>
+
+<span class="n">is_odd</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span>
+
+<span class="nd">@CachedFunction</span>
+<span class="k">def</span> <span class="nf">A000041</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">return</span> <span class="mi">1</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">J</span> <span class="o">=</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">while</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">J</span><span class="p">:</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="n">A000041</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">S</span><span class="o">+</span><span class="n">T</span> <span class="k">if</span> <span class="n">is_odd</span><span class="p">(</span><span class="n">k</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span> <span class="k">else</span> <span class="n">S</span><span class="o">-</span><span class="n">T</span>
+        <span class="n">J</span> <span class="o">-=</span> <span class="n">k</span> <span class="k">if</span> <span class="n">is_odd</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">else</span> <span class="n">k</span><span class="o">//</span><span class="mi">2</span>
+        <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">S</span>
+
+<span class="n">__test__</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;A000041&#39;</span><span class="p">:</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">&gt;&gt;&gt; A000041(5)-1</span>
+<span class="s">6</span>
+<span class="s">&gt;&gt;&gt; A000041(20)-1</span>
+<span class="s">626</span>
+<span class="s">&quot;&quot;&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="solution">
+<h1>Solution<a class="headerlink" href="#solution" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer1</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">A000041</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span> <span class="n">ans</span> <span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">190569291</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">doctest</span><span class="o">,</span> <span class="nn">sys</span>
+    <span class="n">results</span><span class="o">=</span> <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">results</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">failed</span><span class="p">)</span>
+    <span class="c">#performance()</span>
+
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer1</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span> <span class="n">ans</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The number of different ways 100 can be written as a sum:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Counting summations</a></li>
+<li><a class="reference internal" href="#explorations">Explorations</a></li>
+<li><a class="reference internal" href="#analysis">Analysis</a></li>
+<li><a class="reference internal" href="#another-analysis">Another Analysis</a></li>
+<li><a class="reference internal" href="#partition-function">Partition Function</a></li>
+<li><a class="reference internal" href="#solution">Solution</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler71.html" title="previous chapter">Ordered fractions</a></li>
+      <li>Next: <a href="euler79.html" title="next chapter">Passcode derivation</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler76.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler76.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

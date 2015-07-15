@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Sub-string divisibility &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Pentagonal numbers" href="euler44.html" />
+    <link rel="prev" title="Coded triangle numbers" href="euler42.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="sub-string-divisibility">
+<h1>Sub-string divisibility<a class="headerlink" href="#sub-string-divisibility" title="Permalink to this headline">¶</a></h1>
+<p>Problem 43</p>
+<p>The number, 1406357289, is a 0 to 9 pandigital number because it is made up of
+each of the digits 0 to 9 in some order, but it also has a rather interesting
+sub-string divisibility property.</p>
+<p>Let <img class="math" src="_images/math/889b4346c1a4149ec2b708191cb82f6869f9fc2f.png" alt="d_1"/> be the 1<sup>st</sup> digit, <img class="math" src="_images/math/584d548e9bac4fdffc3899e27b4e8ab3d3aeece5.png" alt="d_2"/> be the 2<sup>nd</sup> digit, and so on. In this way, we note the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><img class="math" src="_images/math/adb11350601fdae24d7c3c154da6376b018d85e4.png" alt="d_2 d_3 d_4=406"/> is divisible by 2</li>
+<li><img class="math" src="_images/math/007a6eb4041060ba1e4d7d71b1a4b0d5e5077a25.png" alt="d_3 d_4 d_5=063"/> is divisible by 3</li>
+<li><img class="math" src="_images/math/f0f520507baa3c9c153ccb3549b81ced8672ca5d.png" alt="d_4 d_5 d_6=635"/> is divisible by 5</li>
+<li><img class="math" src="_images/math/5ad2706c8fe8e44190975b9037dfcb9c38b1363b.png" alt="d_5 d_6 d_7=357"/> is divisible by 7</li>
+<li><img class="math" src="_images/math/24685222b262bd6781b90a732c6395fe0e85dcb2.png" alt="d_6 d_7 d_8=572"/> is divisible by 11</li>
+<li><img class="math" src="_images/math/d0fdf9cfb5f8579696d29b1d22f4a66ea2aab2fd.png" alt="d_7 d_8 d_9=728"/> is divisible by 13</li>
+<li><img class="math" src="_images/math/75424edd25be3203fca9aaf7584ca58a50c66884.png" alt="d_8 d_9 d_{10}=289"/> is divisible by 17</li>
+</ul>
+</div></blockquote>
+<p>Find the sum of all 0 to 9 pandigital numbers with this property.</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler43"></span><p>Some handy functions and classes we&#8217;ve already defined.
+<a class="reference internal" href="euler24.html#euler24.Permutation" title="euler24.Permutation"><code class="xref py py-class docutils literal"><span class="pre">euler24.Permutation</span></code></a>, <a class="reference internal" href="euler04.html#euler04.digits" title="euler04.digits"><code class="xref py py-func docutils literal"><span class="pre">euler04.digits()</span></code></a>
+and <a class="reference internal" href="euler35.html#euler35.number" title="euler35.number"><code class="xref py py-func docutils literal"><span class="pre">euler35.number()</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">euler24</span> <span class="kn">import</span> <span class="n">Permutation</span>
+<span class="kn">from</span> <span class="nn">euler04</span> <span class="kn">import</span> <span class="n">digits</span>
+<span class="kn">from</span> <span class="nn">euler35</span> <span class="kn">import</span> <span class="n">number</span>
+</pre></div>
+</div>
+<p>Define the substring divisibility property for a number.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">substringDivisibility</span><span class="p">(</span> <span class="n">i</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The substring divisibility property. The number</span>
+<span class="sd">    is represented as a sequence of digits.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler43 import substringDivisibility</span>
+<span class="sd">    &gt;&gt;&gt; substringDivisibility( digits(1406357289) )</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; substringDivisibility( digits(1406357298) )</span>
+<span class="sd">    False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n2</span><span class="o">=</span> <span class="n">number</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+    <span class="n">n3</span><span class="o">=</span> <span class="n">number</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">])</span>
+    <span class="n">n5</span><span class="o">=</span> <span class="n">number</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
+    <span class="n">n7</span><span class="o">=</span> <span class="n">number</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">7</span><span class="p">])</span>
+    <span class="n">n11</span><span class="o">=</span> <span class="n">number</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="mi">8</span><span class="p">])</span>
+    <span class="n">n13</span><span class="o">=</span> <span class="n">number</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">9</span><span class="p">])</span>
+    <span class="n">n17</span><span class="o">=</span> <span class="n">number</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">10</span><span class="p">])</span>
+    <span class="n">test</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">n2</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">n3</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">n5</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">n7</span> <span class="o">%</span> <span class="mi">7</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">n11</span><span class="o">%</span><span class="mi">11</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">n13</span><span class="o">%</span><span class="mi">13</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">n17</span><span class="o">%</span><span class="mi">17</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span> <span class="n">test</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Generate all numbers with the substringDivisibility property.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">PDSD_gen</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Generate pan-digital numbers with the substring divisibility property.</span>
+<span class="sd">    The number is represented as a sequence of digits.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler43 import PDSD_gen</span>
+<span class="sd">    &gt;&gt;&gt; numbers= list( PDSD_gen() )</span>
+<span class="sd">    &gt;&gt;&gt; 1406357289 in numbers</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; numbers</span>
+<span class="sd">    [1406357289, 1430952867, 1460357289, 4106357289, 4130952867, 4160357289]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pandigital10</span><span class="o">=</span> <span class="n">Permutation</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pandigital10</span><span class="o">.</span><span class="n">nextPerm</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">substringDivisibility</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">number</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">values</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span> <span class="n">PDSD_gen</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">values</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">16695334890</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The sum of all 0 to 9 pandigital numbers with this substring divisibility&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler42.html" title="previous chapter">Coded triangle numbers</a></li>
+      <li>Next: <a href="euler44.html" title="next chapter">Pentagonal numbers</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler43.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler43.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

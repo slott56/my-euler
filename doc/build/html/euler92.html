@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Square digit chains &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Large non-Mersenne prime" href="euler97.html" />
+    <link rel="prev" title="Path sum: two ways" href="euler81.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="square-digit-chains">
+<h1>Square digit chains<a class="headerlink" href="#square-digit-chains" title="Permalink to this headline">¶</a></h1>
+<p>Problem 92</p>
+<p>A number chain is created by continuously adding the square of the digits in a
+number to form a new number until it has been seen before.</p>
+<p>For example,</p>
+<blockquote>
+<div><p>44 → 32 → 13 → 10 → 1 → 1</p>
+<p>85 → 89 → 145 → 42 → 20 → 4 → 16 → 37 → 58 → 89</p>
+</div></blockquote>
+<p>Therefore any chain that arrives at 1 or 89 will become stuck in an endless
+loop. What is most amazing is that EVERY starting number will eventually arrive
+at 1 or 89.</p>
+<p>How many starting numbers below ten million will arrive at 89?</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler92"></span><p>Use <a class="reference internal" href="euler62.html#euler62.digits" title="euler62.digits"><code class="xref py py-func docutils literal"><span class="pre">euler62.digits()</span></code></a>, the version that generates the digits
+rather than the other versions.
+<a class="reference internal" href="euler04.html#euler04.digits" title="euler04.digits"><code class="xref py py-func docutils literal"><span class="pre">euler04.digits()</span></code></a> creates a list;  <code class="xref py py-func docutils literal"><span class="pre">euler51.digits()</span></code> creates a tuple.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">euler62</span> <span class="kn">import</span> <span class="n">digits</span>
+<span class="kn">import</span> <span class="nn">array</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="k">class</span> <span class="nc">Chain1</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Slower than Chain2.</span>
+
+<span class="sd">    &gt;&gt;&gt; c= Chain1()</span>
+<span class="sd">    &gt;&gt;&gt; c.chain(44)</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; c.chain(85)</span>
+<span class="sd">    89</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">1</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="mi">89</span><span class="p">:</span><span class="mi">89</span> <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_chain</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="p">):</span>
+        <span class="k">while</span> <span class="n">n</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">:</span>
+            <span class="n">n</span><span class="o">=</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">d</span><span class="o">*</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">digits</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">chain</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">Chain2</span><span class="p">(</span> <span class="n">Chain1</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;34 seconds total.</span>
+
+<span class="sd">    &gt;&gt;&gt; c= Chain2()</span>
+<span class="sd">    &gt;&gt;&gt; c.chain(44)</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; c.chain(85)</span>
+<span class="sd">    89</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_chain</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="p">):</span>
+        <span class="n">t</span><span class="o">=</span> <span class="n">n</span>
+        <span class="n">visited</span><span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">:</span>
+            <span class="n">t</span><span class="o">=</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">d</span><span class="o">*</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">digits</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">visited</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="c"># Set all the numbers in this chain to point to the same result</span>
+        <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">visited</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">[</span><span class="n">u</span><span class="p">]</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">Chain3</span><span class="p">(</span> <span class="n">Chain1</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;About the same as Chain2.</span>
+
+<span class="sd">    &gt;&gt;&gt; c= Chain3()</span>
+<span class="sd">    &gt;&gt;&gt; c.chain(44)</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; c.chain(85)</span>
+<span class="sd">    89</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10000000</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s">&#39;b&#39;</span><span class="p">,</span><span class="n">size</span><span class="o">*</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">[</span><span class="mi">89</span><span class="p">]</span><span class="o">=</span> <span class="mi">89</span>
+
+    <span class="k">def</span> <span class="nf">_chain</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="p">):</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">n</span><span class="o">=</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">d</span><span class="o">*</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">digits</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">chain</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">memoized</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">start</span><span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+    <span class="n">count</span><span class="o">=</span> <span class="p">{</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">89</span><span class="p">:</span> <span class="mi">0</span> <span class="p">}</span>
+    <span class="n">c</span><span class="o">=</span> <span class="n">Chain2</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10000000</span><span class="p">):</span>
+        <span class="n">count</span><span class="p">[</span> <span class="n">c</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">run</span><span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span><span class="o">-</span><span class="n">start</span>
+    <span class="c"># print( c.__class__.__name__, run )</span>
+    <span class="k">return</span> <span class="n">count</span><span class="p">[</span><span class="mi">89</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span> <span class="n">ans</span> <span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">8581146</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compare the performance of Chain1, Chain2 and Chain3.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">compare_timing</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">timeit</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;Chain1&quot;</span><span class="p">,</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span> <span class="s">&quot;[c.chain(i) for i in range(1,10000)]&quot;</span><span class="p">,</span> <span class="s">&quot;from euler92 import Chain1; c=Chain1()&quot;</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;Chain2&quot;</span><span class="p">,</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span> <span class="s">&quot;[c.chain(i) for i in range(1,10000)]&quot;</span><span class="p">,</span> <span class="s">&quot;from euler92 import Chain2; c=Chain2()&quot;</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;Chain3&quot;</span><span class="p">,</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span> <span class="s">&quot;[c.chain(i) for i in range(1,10000)]&quot;</span><span class="p">,</span> <span class="s">&quot;from euler92 import Chain3; c=Chain3()&quot;</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">compare_timing</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The count of chains with starting numbers below ten million will arrive at 89:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler81.html" title="previous chapter">Path sum: two ways</a></li>
+      <li>Next: <a href="euler97.html" title="next chapter">Large non-Mersenne prime</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler92.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler92.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

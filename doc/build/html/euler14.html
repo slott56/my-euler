@@ -1,0 +1,263 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Longest Collatz sequence &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Lattice paths" href="euler15.html" />
+    <link rel="prev" title="Large sum" href="euler13.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="longest-collatz-sequence">
+<h1>Longest Collatz sequence<a class="headerlink" href="#longest-collatz-sequence" title="Permalink to this headline">¶</a></h1>
+<p>Problem 14</p>
+<p>The following iterative sequence is defined for the set of positive integers:</p>
+<div class="math">
+<p><img src="_images/math/acb0e1ef44287de4a21a112d886b369c57928d48.png" alt="n \rightarrow \begin{cases}
+n/2 &amp;\textbf{ if n is even}, \\
+3n + 1 &amp;\textbf{ if n is odd}
+\end{cases}"/></p>
+</div><p>Using the rule above and starting with 13, we generate the following sequence:</p>
+<blockquote>
+<div>13 → 40 → 20 → 10 → 5 → 16 → 8 → 4 → 2 → 1</div></blockquote>
+<p>It can be seen that this sequence (starting at 13 and finishing at 1)
+contains 10 terms. Although it has not been proved yet (Collatz Problem),
+it is thought that all starting numbers finish at 1.</p>
+<p>Which starting number, under one million, produces the longest chain?</p>
+<p>NOTE: Once the chain starts the terms are allowed to go above one million.</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler14"></span><dl class="function">
+<dt id="euler14.syracuse">
+<code class="descclassname">euler14.</code><code class="descname">syracuse</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#euler14.syracuse" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">The essential Syracuse function.</code></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">next value in the chain after n</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">syracuse</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The sequence rules.</span>
+<span class="sd">    &gt;&gt;&gt; from euler14 import syracuse</span>
+<span class="sd">    &gt;&gt;&gt; syracuse(13)</span>
+<span class="sd">    40</span>
+<span class="sd">    &gt;&gt;&gt; syracuse(40)</span>
+<span class="sd">    20</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">3</span><span class="o">*</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="euler14.syracuse2">
+<code class="descclassname">euler14.</code><code class="descname">syracuse2</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#euler14.syracuse2" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">The essential Syracuse function.</code></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">next value in the chain after n</td>
+</tr>
+</tbody>
+</table>
+<p>This has about the same performance as <a class="reference internal" href="#euler14.syracuse" title="euler14.syracuse"><code class="xref py py-func docutils literal"><span class="pre">syracuse()</span></code></a>.</p>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">syracuse2</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The sequence rules.</span>
+<span class="sd">    &gt;&gt;&gt; from euler14 import syracuse2</span>
+<span class="sd">    &gt;&gt;&gt; syracuse2(13)</span>
+<span class="sd">    40</span>
+<span class="sd">    &gt;&gt;&gt; syracuse2(40)</span>
+<span class="sd">    20</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">3</span><span class="o">*</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>Apply a function to create a chain of values.
+This will work with any integer function,
+we can use <a class="reference internal" href="#euler14.syracuse" title="euler14.syracuse"><code class="xref py py-func docutils literal"><span class="pre">syracuse()</span></code></a> or <a class="reference internal" href="#euler14.syracuse2" title="euler14.syracuse2"><code class="xref py py-func docutils literal"><span class="pre">syracuse2()</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">function_chain_gen</span><span class="p">(</span> <span class="n">n</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="n">syracuse2</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; from euler14 import function_chain_gen</span>
+<span class="sd">    &gt;&gt;&gt; cg= function_chain_gen(13)</span>
+<span class="sd">    &gt;&gt;&gt; [next(cg) for i in range(10)]</span>
+<span class="sd">    [13, 40, 20, 10, 5, 16, 8, 4, 2, 1]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">n</span>
+        <span class="n">n</span><span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Apply a function chain until we get to a previously known
+value.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">known</span> <span class="o">=</span> <span class="p">{</span> <span class="p">}</span>
+<span class="k">def</span> <span class="nf">seqToLoopOrKnown</span><span class="p">(</span> <span class="n">n</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="n">syracuse2</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Follow a function chain until it reaches a previous seen value.</span>
+<span class="sd">    Returns the length of the sequence.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler14 import seqToLoopOrKnown</span>
+<span class="sd">    &gt;&gt;&gt; seq13_len= seqToLoopOrKnown(13)</span>
+<span class="sd">    &gt;&gt;&gt; seq13_len</span>
+<span class="sd">    10</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">known</span>
+    <span class="n">seq</span><span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">function_chain_gen</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">function</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">seq</span><span class="p">:</span>
+            <span class="n">known</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">known</span><span class="p">:</span>
+            <span class="n">known</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">=</span> <span class="n">known</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">known</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Apply a function chain until we get to 1.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">seqTo1_iter</span><span class="p">(</span> <span class="n">n</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="n">syracuse2</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Follow a function chain until it reaches 1.</span>
+<span class="sd">    Yields each value of the sequence.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler14 import seqTo1_iter</span>
+<span class="sd">    &gt;&gt;&gt; seq13= list(seqTo1_iter(13))</span>
+<span class="sd">    &gt;&gt;&gt; len(seq13)</span>
+<span class="sd">    10</span>
+<span class="sd">    &gt;&gt;&gt; seq13</span>
+<span class="sd">    [13, 40, 20, 10, 5, 16, 8, 4, 2, 1]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">function_chain_gen</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">function</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">r</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">break</span>
+</pre></div>
+</div>
+<p>Test module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the longest Collatz sequence from numbers to 1,000,000.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">maxSeqLen</span><span class="p">,</span> <span class="n">maxSeqN</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span> <span class="p">(</span><span class="n">seqToLoopOrKnown</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000000</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">maxSeqN</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">837799</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compare performance of <a class="reference internal" href="#euler14.syracuse" title="euler14.syracuse"><code class="xref py py-func docutils literal"><span class="pre">syracuse()</span></code></a> and <a class="reference internal" href="#euler14.syracuse2" title="euler14.syracuse2"><code class="xref py py-func docutils literal"><span class="pre">syracuse2()</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">compare_timing</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">timeit</span>
+    <span class="n">s</span><span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span> <span class="s">&quot;list(seqTo1_iter(13,syracuse))&quot;</span><span class="p">,</span> <span class="s">&quot;from euler14 import seqTo1_iter, syracuse&quot;</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;syracuse&quot;</span><span class="p">,</span> <span class="n">s</span> <span class="p">)</span>
+    <span class="n">s2</span><span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span> <span class="s">&quot;list(seqTo1_iter(13,syracuse2))&quot;</span><span class="p">,</span> <span class="s">&quot;from euler14 import seqTo1_iter, syracuse2&quot;</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;syracuse2&quot;</span><span class="p">,</span> <span class="n">s2</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The starting number, under one million, produces the longest chain:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+    <span class="c">#compare_timing()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler13.html" title="previous chapter">Large sum</a></li>
+      <li>Next: <a href="euler15.html" title="next chapter">Lattice paths</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler14.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler14.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

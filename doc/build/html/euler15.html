@@ -1,0 +1,278 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Lattice paths &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Power digit sum" href="euler16.html" />
+    <link rel="prev" title="Longest Collatz sequence" href="euler14.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="lattice-paths">
+<h1>Lattice paths<a class="headerlink" href="#lattice-paths" title="Permalink to this headline">¶</a></h1>
+<p>Problem 15</p>
+<p>Starting in the top left corner of a 2×2 grid,
+there are 6 routes (without backtracking) to the bottom right corner.</p>
+<div class="highlight-python"><div class="highlight"><pre>*********
+|   |   *
++---+---*
+|   |   *
+----|---v
+
+*****----
+|   *   |
++---*****
+|   |   *
+----|---v
+
+*****----
+|   *   |
++---*---+
+|   *   |
+----****&gt;
+
+*---+----
+*   |   |
+*********
+|   |   *
+----+---v
+
+*---+----
+*   |   |
+*****---+
+|   *   |
+----****&gt;
+
+*---+----
+*   |   |
+*---+---+
+*   |   |
+********&gt;
+</pre></div>
+</div>
+<p>How many routes are there through a 20×20 grid?</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler15"></span><div class="section" id="step-1-generate-the-paths">
+<h2>Step 1: Generate the Paths<a class="headerlink" href="#step-1-generate-the-paths" title="Permalink to this headline">¶</a></h2>
+<p>The route through a grid contains a mixture of &#8220;R&#8221; and &#8220;D&#8221; steps.
+In a 2x2 grid, there must be 2 R&#8217;s and 2 D&#8217;s to go right and down.</p>
+<p>There are 4! permutations of R and D, but only 6 paths through a 2x2 grid.
+Because the R&#8217;s and D&#8217;s are indistinguishable, there are 18 permutations
+which map to the 6.</p>
+<p>Other view</p>
+<ul class="simple">
+<li>rt&#8217;s in positions 0-19; dn&#8217;s in positions 20-39</li>
+<li>rt&#8217;s in positions 0-18 and 20; dn&#8217;s in 19 and positions 21-39</li>
+<li>...</li>
+<li>rt&#8217;s in positions 0,2,4,...,38; dn&#8217;s in positions 1,3,5,...,39</li>
+</ul>
+<p>2x2 case</p>
+<ul class="simple">
+<li>rt ( 0, 1 ) -: dn ( 2, 3 ) == ( rt, rt, dn, dn )</li>
+<li>rt ( 0, 2 ) -: dn ( 1, 3 ) == ( rt, dn, rt, dn )</li>
+<li>rt ( 0, 3 ) -: dn ( 1, 2 ) == ( rt, dn, dn, rt )</li>
+<li>rt ( 1, 2 ) -: dn ( 0, 3 ) == ( dn, rt, rt, dn )</li>
+<li>rt ( 1, 3 ) -: dn ( 0, 2 ) == ( dn, rt, dn, rt )</li>
+<li>rt ( 2, 3 ) -: dn ( 0, 1 ) == ( dn, dn, rt, rt )</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="k">def</span> <span class="nf">generate</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+    <span class="n">rt_pos</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+    <span class="n">i</span><span class="o">=</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span> <span class="c"># position at which we are counting</span>
+    <span class="k">yield</span> <span class="n">rt_pos</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">rt_pos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span>
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">rt_pos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;=</span> <span class="n">n</span><span class="o">+</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">rt_pos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">rt_pos</span><span class="p">)):</span>
+                <span class="n">rt_pos</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">=</span> <span class="n">rt_pos</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span>
+            <span class="n">i</span><span class="o">=</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span>
+            <span class="k">yield</span> <span class="n">rt_pos</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rt_pos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rt_pos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">yield</span> <span class="n">rt_pos</span>
+
+<span class="k">def</span> <span class="nf">study</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">generate</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span> <span class="n">g</span> <span class="p">)</span>
+
+    <span class="n">counts</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">generate</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+        <span class="n">counts</span><span class="p">[</span><span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">print</span><span class="p">(</span> <span class="n">g</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="n">counts</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>4x4 case results:</p>
+<p>[0, 1, 2, x] 5 examples</p>
+<p>[0, 1, 3, x] 4</p>
+<p>[0, 1, 4, x] 3</p>
+<p>[0, 1, 5, x] 2</p>
+<p>[0, 1, 6, 7] 1</p>
+<p>[0, 2, 3, x] 4, etc. for 3, 2, 1</p>
+<p>[0, 3, 4, x] 3, etc. for 2, 1</p>
+<p>[0, 4, 5, x] 2, 1</p>
+<p>[0, 5, 6, 7]</p>
+<p>subtotal = 35. Mirror image = 35 more. Total 70.</p>
+<p>This will be slow to generate for 20×20 case.</p>
+</div>
+<div class="section" id="step-2-generalize-the-results">
+<h2>Step 2: Generalize the Results<a class="headerlink" href="#step-2-generalize-the-results" title="Permalink to this headline">¶</a></h2>
+<p>Paths in an <img class="math" src="_images/math/e7df745df933619c7987cb698a5e51f16263d9f8.png" alt="n \times n"/> lattice is <img class="math" src="_images/math/9860d5cc5f28a12f8da680ce2a49a4b72d66c527.png" alt="\binom{2n}{n}"/>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">paths</span><span class="p">(</span> <span class="n">n</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; from euler15 import paths</span>
+<span class="sd">    &gt;&gt;&gt; paths(2)</span>
+<span class="sd">    6</span>
+<span class="sd">    &gt;&gt;&gt; paths(4)</span>
+<span class="sd">    70</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">combinations</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Number of combinations of n things taken k at a time,
+<img class="math" src="_images/math/b03fd80d8e391041581030fe46f2e82e031dbec9.png" alt="\binom{n}{k} = \dfrac{n!}{k!(n-k)!}"/></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">combinations</span><span class="p">(</span> <span class="n">n</span><span class="p">,</span> <span class="n">k</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; from euler15 import combinations</span>
+<span class="sd">    &gt;&gt;&gt; combinations(4,2)</span>
+<span class="sd">    6</span>
+<span class="sd">    &gt;&gt;&gt; combinations(8,4)</span>
+<span class="sd">    70</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">k</span> <span class="o">&lt;=</span> <span class="n">n</span>
+    <span class="k">def</span> <span class="nf">fact</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">a</span><span class="o">*</span><span class="n">fact</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">fact</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">//</span><span class="p">(</span> <span class="n">fact</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">*</span><span class="n">fact</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="n">k</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Test module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">paths</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">137846528820</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c">#study()</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;Number of routes are there through a 20×20 grid:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Lattice paths</a><ul>
+<li><a class="reference internal" href="#step-1-generate-the-paths">Step 1: Generate the Paths</a></li>
+<li><a class="reference internal" href="#step-2-generalize-the-results">Step 2: Generalize the Results</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler14.html" title="previous chapter">Longest Collatz sequence</a></li>
+      <li>Next: <a href="euler16.html" title="next chapter">Power digit sum</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler15.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler15.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Convergents of e &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Maximum path sum II" href="euler67.html" />
+    <link rel="prev" title="Powerful digit counts" href="euler63.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="convergents-of-e">
+<h1>Convergents of e<a class="headerlink" href="#convergents-of-e" title="Permalink to this headline">¶</a></h1>
+<p>Problem 65</p>
+<p>The square root of 2 can be written as an infinite continued fraction.</p>
+<blockquote>
+<div>sqrt(2) = 1 + 1/(2 + 1/(2 + 1/(2 + ... ))) = 1.414213...</div></blockquote>
+<div class="math">
+<p><img src="_images/math/5b032365a29bbdb6452945a27a0ab8f226735c05.png" alt="\sqrt 2 = 1 +
+\cfrac{1}{2+
+    \cfrac{1}{2+
+        \cfrac{1}{2+\dotsb
+}}}"/></p>
+</div><p>The infinite continued fraction can be written, √2 = [1;(2)], (2) indicates that 2 repeats ad infinitum.
+In a similar way, √23 = [4;(1,3,1,8)].</p>
+<p>It turns out that the sequence of partial values of continued fractions for square roots provide the best rational approximations. Let us consider the convergents for √2.</p>
+<div class="math">
+<p><img src="_images/math/5dd9d8d128fd6933a06775221e7d760bdd5716e3.png" alt="1+\cfrac{1}{2} = \dfrac{3}{2}"/></p>
+</div><div class="math">
+<p><img src="_images/math/60fef8736299070353a06f6e0e1f77153c6d2a46.png" alt="1 +
+\cfrac{1}{2+
+    \cfrac{1}{2}} = \dfrac{7}{5}"/></p>
+</div><div class="math">
+<p><img src="_images/math/c881782956976631998ac4bace670f23e9af2d47.png" alt="1 +
+\cfrac{1}{2+
+    \cfrac{1}{2+
+        \cfrac{1}{2}}} = \dfrac{17}{12}"/></p>
+</div><div class="math">
+<p><img src="_images/math/7c63c23d81e8848552555b7c810c50beb199a7fe.png" alt="1 +
+\cfrac{1}{2+
+   \cfrac{1}{2+
+       \cfrac{1}{2+
+            \cfrac{1}{2}}}} = \dfrac{41}{29}"/></p>
+</div><p>Hence the sequence of the first ten convergents for √2 are:</p>
+<blockquote>
+<div>1, 3/2, 7/5, 17/12, 41/29, 99/70, 239/169, 577/408, 1393/985, 3363/2378, ...</div></blockquote>
+<p>What is most surprising is that the important mathematical constant,
+e = [2; 1,2,1, 1,4,1, 1,6,1 , ... , 1,2k,1, ...].</p>
+<p>The first ten terms in the sequence of convergents for e are:</p>
+<blockquote>
+<div>2, 3, 8/3, 11/4, 19/7, 87/32, 106/39, 193/71, 1264/465, 1457/536, ...</div></blockquote>
+<p>The sum of digits in the numerator of the 10th convergent is 1+4+5+7=17.</p>
+<p>Find the sum of digits in the numerator of the 100th convergent of the continued fraction for e.</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler65"></span><p>Use the <a class="reference internal" href="euler04.html#euler04.digits" title="euler04.digits"><code class="xref py py-func docutils literal"><span class="pre">euler04.digits()</span></code></a> function.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">euler04</span> <span class="kn">import</span> <span class="n">digits</span>
+<span class="kn">from</span> <span class="nn">fractions</span> <span class="kn">import</span> <span class="n">Fraction</span>
+</pre></div>
+</div>
+<p>First, examine the repeating fraction.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">demo</span><span class="p">():</span>
+    <span class="k">print</span><span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">)))</span> <span class="p">)</span>
+
+    <span class="k">print</span><span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">+</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">+</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">+</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">+</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">+</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">+</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))))</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Define a function to create a proper repeating fraction
+representation. Provide the constant and the sequence of denominator
+values.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">recursive_fraction</span><span class="p">(</span> <span class="n">t_0</span><span class="p">,</span> <span class="n">den</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute a single recursive fraction value from t0 and</span>
+<span class="sd">    the sequence of denominator values.</span>
+
+<span class="sd">    &gt;&gt;&gt; recursive_fraction( 1, () )</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; recursive_fraction( 1, (2,) )</span>
+<span class="sd">    Fraction(3, 2)</span>
+<span class="sd">    &gt;&gt;&gt; recursive_fraction( 1, (2,2,) )</span>
+<span class="sd">    Fraction(7, 5)</span>
+<span class="sd">    &gt;&gt;&gt; recursive_fraction( 1, (2,2,2,) )</span>
+<span class="sd">    Fraction(17, 12)</span>
+<span class="sd">    &gt;&gt;&gt; recursive_fraction( 1, (2,2,2,2,) )</span>
+<span class="sd">    Fraction(41, 29)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">frac</span><span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">den</span><span class="p">):</span>
+        <span class="n">frac</span><span class="o">=</span> <span class="n">Fraction</span><span class="p">(</span> <span class="mi">1</span><span class="p">,</span> <span class="n">d</span><span class="o">+</span><span class="n">frac</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">frac</span><span class="o">+</span><span class="n">t_0</span>
+</pre></div>
+</div>
+<p>Summary version of the repeating fraction using a repeating pattern.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">fraction_steps</span><span class="p">(</span> <span class="n">t_0</span><span class="p">,</span> <span class="n">den_pat</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Yield convergent steps of the recursive fraction from [t_0;den_pat]</span>
+
+<span class="sd">    Use recursive_fraction( t_0, (den_pat*(1+n//len(den_pat)))[:n])</span>
+
+<span class="sd">    :math:`\sqrt{2}` = [1;(2)] = fraction_steps( 1, (2,) )</span>
+
+<span class="sd">    Yields:</span>
+
+<span class="sd">    -    1</span>
+
+<span class="sd">    -    1 + 1/(2) == 3/2</span>
+
+<span class="sd">    -    1 + 1/(2 + 1/(2)) == 7/5</span>
+
+<span class="sd">    -    1 + 1/(2 + 1/(2 + 1/(2 ))) == 17/12</span>
+
+<span class="sd">    -    1 + 1/(2 + 1/(2 + 1/(2 + 1/(2 ) ))) == 41/29</span>
+
+<span class="sd">    The tricky bit is to avoid explicitly recomputing everything.</span>
+
+<span class="sd">    :math:`\sqrt{23}` = [4;(1,3,1,8)] = fraction_steps( 4, (1,3,1,8) )</span>
+
+<span class="sd">    Yields:</span>
+
+<span class="sd">    -    4</span>
+
+<span class="sd">    -    4 + 1/(1)</span>
+
+<span class="sd">    -    4 + 1/(1 + 1/(3))</span>
+
+<span class="sd">    -    4 + 1/(1 + 1/(3 + 1/(1 )))</span>
+
+<span class="sd">    -    4 + 1/(1 + 1/(3 + 1/(1 + 1/(8 ) )))</span>
+
+<span class="sd">    &gt;&gt;&gt; converge2= fraction_steps( 1, (2,) )</span>
+<span class="sd">    &gt;&gt;&gt; [ next(converge2) for i in range(10) ]</span>
+<span class="sd">    [1, Fraction(3, 2), Fraction(7, 5), Fraction(17, 12), Fraction(41, 29), Fraction(99, 70), Fraction(239, 169), Fraction(577, 408), Fraction(1393, 985), Fraction(3363, 2378)]</span>
+<span class="sd">    &gt;&gt;&gt; converge23= fraction_steps( 4, (1,3,1,8,) )</span>
+<span class="sd">    &gt;&gt;&gt; [ next(converge23) for i in range(7) ]</span>
+<span class="sd">    [4, Fraction(5, 1), Fraction(19, 4), Fraction(24, 5), Fraction(211, 44), Fraction(235, 49), Fraction(916, 191)]</span>
+<span class="sd">    &gt;&gt;&gt; converge_e = fraction_steps( 2, (1,2,1, 1,4,1, 1,6,1, 1,8,1) )</span>
+<span class="sd">    &gt;&gt;&gt; [ next(converge_e) for i in range(10) ]</span>
+<span class="sd">    [2, Fraction(3, 1), Fraction(8, 3), Fraction(11, 4), Fraction(19, 7), Fraction(87, 32), Fraction(106, 39), Fraction(193, 71), Fraction(1264, 465), Fraction(1457, 536)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span><span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">recursive_fraction</span><span class="p">(</span> <span class="n">t_0</span><span class="p">,</span> <span class="p">(</span><span class="n">den_pat</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">n</span><span class="o">//</span><span class="nb">len</span><span class="p">(</span><span class="n">den_pat</span><span class="p">)))[:</span><span class="n">n</span><span class="p">])</span>
+        <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>Pattern for e, extended to cover the required number of terms.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">den_pat_e</span><span class="p">(</span> <span class="n">steps</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; tuple( den_pat_e(12) )</span>
+<span class="sd">    (1, 2, 1, 1, 4, 1, 1, 6, 1, 1, 8, 1)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">steps</span><span class="o">//</span><span class="mi">3</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="mi">1</span>
+        <span class="k">yield</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>Extract the digits of a particular numerator of a convergent series.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">numerator</span><span class="p">(</span> <span class="n">convergent</span><span class="p">,</span> <span class="n">position</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; converge_e = fraction_steps( 2, tuple(den_pat_e(10)) )</span>
+<span class="sd">    &gt;&gt;&gt; n= numerator( converge_e, 10 )</span>
+<span class="sd">    &gt;&gt;&gt; n</span>
+<span class="sd">    [1, 4, 5, 7]</span>
+<span class="sd">    &gt;&gt;&gt; sum( n )</span>
+<span class="sd">    17</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="p">[</span> <span class="nb">next</span><span class="p">(</span><span class="n">convergent</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">position</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">]</span>
+    <span class="n">term</span><span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">convergent</span><span class="p">)</span>
+    <span class="c">#print( term, float(term) )</span>
+    <span class="n">numerator</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">numerator</span>
+    <span class="k">return</span> <span class="n">digits</span><span class="p">(</span><span class="n">numerator</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; demo()</span>
+<span class="sd">    1</span>
+<span class="sd">    1.5</span>
+<span class="sd">    1.4</span>
+<span class="sd">    1.4166666666666667</span>
+<span class="sd">    1.4137931034482758</span>
+<span class="sd">    1</span>
+<span class="sd">    3/2</span>
+<span class="sd">    7/5</span>
+<span class="sd">    17/12</span>
+<span class="sd">    41/29</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">converge_e</span> <span class="o">=</span> <span class="n">fraction_steps</span><span class="p">(</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">den_pat_e</span><span class="p">(</span><span class="mi">100</span><span class="p">))</span> <span class="p">)</span>
+    <span class="n">num</span><span class="o">=</span> <span class="n">numerator</span><span class="p">(</span> <span class="n">converge_e</span><span class="p">,</span> <span class="mi">100</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">num</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span> <span class="n">ans</span> <span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">272</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span> <span class="n">ans</span> <span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The sum of digits in the numerator of the 100th convergent of the continued fraction for e:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler63.html" title="previous chapter">Powerful digit counts</a></li>
+      <li>Next: <a href="euler67.html" title="next chapter">Maximum path sum II</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler65.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler65.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

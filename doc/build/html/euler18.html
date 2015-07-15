@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Maximum path sum I &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Counting Sundays" href="euler19.html" />
+    <link rel="prev" title="Number letter counts" href="euler17.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="maximum-path-sum-i">
+<span id="problem18"></span><h1>Maximum path sum I<a class="headerlink" href="#maximum-path-sum-i" title="Permalink to this headline">¶</a></h1>
+<p>Problem 18</p>
+<p>By starting at the top of the triangle below and moving to adjacent
+numbers on the row below, the maximum total from top to bottom is 23.</p>
+<pre class="literal-block">
+   <span class="red-text">3</span>
+  <span class="red-text">7</span> 5
+ 2 <span class="red-text">4</span> 6
+8 5 <span class="red-text">9</span> 3
+</pre>
+<p>That is, 3 + 7 + 4 + 9 = 23.</p>
+<p>Find the maximum total from top to bottom of the triangle below:</p>
+<div class="highlight-python"><div class="highlight"><pre>              75
+             95 64
+            17 47 82
+           18 35 87 10
+          20 04 82 47 65
+         19 01 23 75 03 34
+        88 02 77 73 07 63 67
+       99 65 04 28 06 16 70 92
+      41 41 26 56 83 40 80 70 33
+     41 48 72 33 47 32 37 16 94 29
+    53 71 44 65 25 43 91 52 97 51 14
+   70 11 33 28 77 73 17 78 39 68 17 57
+  91 71 52 38 17 14 91 43 58 50 27 29 48
+ 63 66 04 68 89 53 67 30 73 16 69 87 40 31
+04 62 98 27 23 09 70 98 73 93 38 53 60 04 23
+</pre></div>
+</div>
+<p>NOTE: As there are only 16384 routes, it is possible to solve this
+problem by trying every route. However, <a class="reference internal" href="euler67.html#problem67"><span>Maximum path sum II</span></a>, is the same
+challenge with a triangle containing one-hundred rows; it cannot
+be solved by brute force, and requires a clever method! ;o)</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler18"></span><p>The triangle to process.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">t15_text</span><span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">75</span>
+<span class="s">95 64</span>
+<span class="s">17 47 82</span>
+<span class="s">18 35 87 10</span>
+<span class="s">20 04 82 47 65</span>
+<span class="s">19 01 23 75 03 34</span>
+<span class="s">88 02 77 73 07 63 67</span>
+<span class="s">99 65 04 28 06 16 70 92</span>
+<span class="s">41 41 26 56 83 40 80 70 33</span>
+<span class="s">41 48 72 33 47 32 37 16 94 29</span>
+<span class="s">53 71 44 65 25 43 91 52 97 51 14</span>
+<span class="s">70 11 33 28 77 73 17 78 39 68 17 57</span>
+<span class="s">91 71 52 38 17 14 91 43 58 50 27 29 48</span>
+<span class="s">63 66 04 68 89 53 67 30 73 16 69 87 40 31</span>
+<span class="s">04 62 98 27 23 09 70 98 73 93 38 53 60 04 23</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="n">t15</span><span class="o">=</span> <span class="p">[</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">t15_text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="p">]</span>
+<span class="k">assert</span> <span class="mi">15</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">t15</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Path Up a Triangle</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">pathUp</span><span class="p">(</span> <span class="n">triangle</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; t4= [</span>
+<span class="sd">    ... (3,),</span>
+<span class="sd">    ... (7, 5),</span>
+<span class="sd">    ... (2, 4, 6),</span>
+<span class="sd">    ... (8, 5, 9, 3),</span>
+<span class="sd">    ... ]</span>
+<span class="sd">    ...</span>
+<span class="sd">    &gt;&gt;&gt; pathUp(t4)</span>
+<span class="sd">    23</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">triangle</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">triangle</span><span class="p">))</span>
+    <span class="n">pathLen</span><span class="o">=</span> <span class="n">triangle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c"># Each bottom row item is an initial value for the length.</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">triangle</span><span class="p">)</span> <span class="p">):</span>
+        <span class="n">newPath</span><span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">triangle</span><span class="p">[</span><span class="n">row</span><span class="p">])):</span>
+            <span class="n">sl</span><span class="o">=</span> <span class="n">triangle</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span><span class="o">+</span><span class="n">pathLen</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+            <span class="n">sr</span><span class="o">=</span> <span class="n">triangle</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span><span class="o">+</span><span class="n">pathLen</span><span class="p">[</span><span class="n">col</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">newPath</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="nb">max</span><span class="p">(</span><span class="n">sl</span><span class="p">,</span><span class="n">sr</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">pathLen</span><span class="o">=</span> <span class="n">newPath</span>
+    <span class="k">return</span> <span class="n">pathLen</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Test the components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">pathUp</span><span class="p">(</span> <span class="n">t15</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">1074</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The maximum total from top to bottom of the given triangle:&quot;</span><span class="p">,</span> <span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler17.html" title="previous chapter">Number letter counts</a></li>
+      <li>Next: <a href="euler19.html" title="next chapter">Counting Sundays</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler18.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler18.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

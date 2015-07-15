@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Pandigital products &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Digit canceling fractions" href="euler33.html" />
+    <link rel="prev" title="Coin sums" href="euler31.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pandigital-products">
+<h1>Pandigital products<a class="headerlink" href="#pandigital-products" title="Permalink to this headline">¶</a></h1>
+<p>Problem 32</p>
+<p>We shall say that an n-digit number is pandigital if it makes use of all the
+digits 1 to n exactly once; for example, the 5-digit number, 15234, is 1 through
+5 pandigital.</p>
+<p>The product 7254 is unusual, as the identity, 39 × 186 = 7254, containing
+multiplicand, multiplier, and product is 1 through 9 pandigital.</p>
+<p>Find the sum of all products whose multiplicand/multiplier/product identity can
+be written as a 1 through 9 pandigital.</p>
+<p>HINT: Some products can be obtained in
+more than one way so be sure to only include it once in your sum.</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler32"></span><p>Use <a class="reference internal" href="euler24.html#euler24.Permutation" title="euler24.Permutation"><code class="xref py py-class docutils literal"><span class="pre">euler24.Permutation</span></code></a> to generate permutations.
+Use <a class="reference internal" href="euler35.html#euler35.number" title="euler35.number"><code class="xref py py-func docutils literal"><span class="pre">euler35.number()</span></code></a> to convert sequences of digits to proper numbers.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">euler24</span> <span class="kn">import</span> <span class="n">Permutation</span>
+<span class="kn">from</span> <span class="nn">euler35</span> <span class="kn">import</span> <span class="n">number</span>
+</pre></div>
+</div>
+<p>Generate permutations of 9-digit numbers.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">genPerms</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Create the 9! permutations of the digits 1-9.</span>
+
+<span class="sd">    &gt;&gt;&gt; from euler32 import genPerms</span>
+<span class="sd">    &gt;&gt;&gt; permList= list(genPerms())</span>
+<span class="sd">    &gt;&gt;&gt; len(permList) # 9! = 362880</span>
+<span class="sd">    362880</span>
+<span class="sd">    &gt;&gt;&gt; permList[:2]</span>
+<span class="sd">    [[1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 2, 3, 4, 5, 6, 7, 9, 8]]</span>
+<span class="sd">    &gt;&gt;&gt; permList[-2:]</span>
+<span class="sd">    [[9, 8, 7, 6, 5, 4, 3, 1, 2], [9, 8, 7, 6, 5, 4, 3, 2, 1]]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">permN</span><span class="o">=</span> <span class="n">Permutation</span><span class="p">(</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span> <span class="p">)</span> <span class="c"># 1 to 9</span>
+    <span class="k">return</span> <span class="n">permN</span><span class="o">.</span><span class="n">nextPerm</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">panDigitProducts</span><span class="p">(</span> <span class="n">permList</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Take each permutation of digits and slice into 3 pieces.</span>
+<span class="sd">    Check to see if each piece is a proper product.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">ai</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">9</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">bi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ai</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">permList</span><span class="p">:</span>
+                <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">perm</span><span class="p">[:</span><span class="n">ai</span><span class="p">],</span> <span class="n">perm</span><span class="p">[</span><span class="n">ai</span><span class="p">:</span><span class="n">ai</span><span class="o">+</span><span class="n">bi</span><span class="p">],</span> <span class="n">perm</span><span class="p">[</span><span class="n">ai</span><span class="o">+</span><span class="n">bi</span><span class="p">:]</span>
+                <span class="k">if</span> <span class="n">number</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">*</span><span class="n">number</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">==</span> <span class="n">number</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="n">number</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Test the components in this module.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="n">permList</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span> <span class="n">genPerms</span><span class="p">()</span> <span class="p">)</span>
+    <span class="n">prodSet</span><span class="o">=</span> <span class="nb">set</span><span class="p">(</span> <span class="n">panDigitProducts</span><span class="p">(</span><span class="n">permList</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="n">prodSet</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span> <span class="n">ans</span> <span class="p">):</span>
+    <span class="k">assert</span> <span class="n">ans</span> <span class="o">==</span> <span class="mi">45228</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The sum of all products whose multiplicand/multiplier/product identity can&quot;</span>
+        <span class="s">&quot; be written as a 1 through 9 pandigital:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler31.html" title="previous chapter">Coin sums</a></li>
+      <li>Next: <a href="euler33.html" title="next chapter">Digit canceling fractions</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler32.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler32.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

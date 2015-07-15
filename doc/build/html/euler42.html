@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Coded triangle numbers &mdash; S. Lott Project Euler 1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/euler.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="S. Lott Project Euler 1.2 documentation" href="index.html" />
+    <link rel="next" title="Sub-string divisibility" href="euler43.html" />
+    <link rel="prev" title="Pandigital prime" href="euler41.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="coded-triangle-numbers">
+<h1>Coded triangle numbers<a class="headerlink" href="#coded-triangle-numbers" title="Permalink to this headline">¶</a></h1>
+<p>Problem 42</p>
+<p>The n<sup>th</sup> term of the sequence of triangle numbers is given by,
+<img class="math" src="_images/math/a3e29d3535d79131e3444426638e3d88b8068a8b.png" alt="t_n = (1/2)n(n+1)"/>; so the first ten triangle numbers are:</p>
+<blockquote>
+<div>1, 3, 6, 10, 15, 21, 28, 36, 45, 55, ...</div></blockquote>
+<p>By converting each letter in a word to a number corresponding to its
+alphabetical position and adding these values we form a word value. For example,
+the word value for SKY is <img class="math" src="_images/math/da080337f1bad9a4fe88df849a836053ea228c6a.png" alt="19 + 11 + 25 = 55 = t_{10}"/>. If the word value is a
+triangle number then we shall call the word a triangle word.</p>
+<p>Using <a class="reference external" href="http://projecteuler.net/project/words.txt">words.txt</a> (right click and &#8216;Save Link/Target As...&#8217;), a 16K text file
+containing nearly two-thousand common English words, how many are triangle
+words?</p>
+<p class="rubric">Solution</p>
+<span class="target" id="module-euler42"></span><div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">urllib.request</span>
+<span class="kn">from</span> <span class="nn">string</span> <span class="kn">import</span> <span class="n">ascii_uppercase</span>
+</pre></div>
+</div>
+<p>Convert a word to a number.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">ltr2nbr</span><span class="p">(</span> <span class="n">s</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; from euler42 import ltr2nbr</span>
+<span class="sd">    &gt;&gt;&gt; ltr2nbr(&quot;SKY&quot;)</span>
+<span class="sd">    [19, 11, 25]</span>
+<span class="sd">    &gt;&gt;&gt; sum(ltr2nbr(&quot;SKY&quot;))</span>
+<span class="sd">    55</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span> <span class="mi">1</span><span class="o">+</span><span class="n">ascii_uppercase</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">s</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p>We&#8217;ll build the set of triangle numbers incrementally.
+This allows us to build just enough triangle numbers to
+encompass the numbers we&#8217;re creating for the words
+we&#8217;ve seen.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">triangleWords</span><span class="p">(</span> <span class="n">words</span> <span class="p">):</span>
+    <span class="n">triangles</span><span class="o">=</span> <span class="nb">set</span><span class="p">(</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+    <span class="n">tri</span><span class="o">=</span> <span class="mi">1</span>
+    <span class="n">order</span><span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words</span><span class="p">:</span>
+        <span class="n">n</span><span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ltr2nbr</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>
+        <span class="k">while</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="n">tri</span><span class="p">:</span>
+            <span class="n">order</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">tri</span><span class="o">=</span> <span class="p">(</span><span class="n">order</span><span class="o">*</span><span class="p">(</span><span class="n">order</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">//</span><span class="mi">2</span>
+            <span class="n">triangles</span><span class="o">.</span><span class="n">add</span><span class="p">(</span> <span class="n">tri</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">triangles</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">w</span><span class="p">,</span> <span class="n">n</span>
+</pre></div>
+</div>
+<p>Test the module components.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">answer</span><span class="p">():</span>
+    <span class="c"># &quot;http://projecteuler.net/project/words.txt&quot;</span>
+    <span class="n">words_txt</span><span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span> <span class="s">&quot;file:words.txt&quot;</span> <span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&quot;ascii&quot;</span><span class="p">)</span>
+    <span class="n">words</span><span class="o">=</span> <span class="p">[</span> <span class="n">w</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;&quot;&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words_txt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span> <span class="p">]</span>
+    <span class="n">twords</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span> <span class="n">triangleWords</span><span class="p">(</span><span class="n">words</span><span class="p">)</span> <span class="p">)</span>
+    <span class="c">#print len(twords), twords</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">twords</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Confirm the answer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="mi">162</span> <span class="o">==</span> <span class="n">ans</span><span class="p">,</span> <span class="s">&quot;{0!r} Incorrect&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">ans</span><span class="o">=</span> <span class="n">answer</span><span class="p">()</span>
+    <span class="n">confirm</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s">&quot;The number of words which are triangle words:&quot;</span><span class="p">,</span> <span class="n">ans</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="euler41.html" title="previous chapter">Pandigital prime</a></li>
+      <li>Next: <a href="euler43.html" title="next chapter">Sub-string divisibility</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/euler42.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/euler42.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
